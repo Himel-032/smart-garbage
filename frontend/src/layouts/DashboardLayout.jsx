@@ -1,5 +1,6 @@
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer.jsx";
 import { useState } from "react";
 
 export default function DashboardLayout({ children }) {
@@ -12,12 +13,13 @@ export default function DashboardLayout({ children }) {
 
       {/* Main Area */}
       <div
-        className={`flex-1 transition-all duration-300 ${
+        className={`flex-1 flex flex-col transition-all duration-300 ${
           isSidebarExpanded ? "ml-64" : "ml-16"
         }`}
       >
         <Navbar />
-        <main className="p-6">{children}</main>
+        <main className="flex-1 p-6">{children}</main>
+        <Footer />
       </div>
     </div>
   );

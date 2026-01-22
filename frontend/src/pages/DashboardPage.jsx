@@ -1,7 +1,8 @@
-import Navbar from "../components/Navbar";
-import { useAuth } from "../context/AuthContext";
 
-export default function Dashboard() {
+import { useAuth } from "../context/AuthContext";
+import DashboardLayout from "../layouts/DashboardLayout";
+
+export default function DashboardPage() {
   const { admin, loading } = useAuth();
 
   if (loading) {
@@ -17,8 +18,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div>
-      <Navbar />
+    <DashboardLayout>
       <div className="p-4">
         <h2 className="text-2xl font-bold mb-4">
           Welcome to the Dashboard, {admin.name}!
@@ -34,6 +34,6 @@ export default function Dashboard() {
           </p>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

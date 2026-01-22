@@ -1,10 +1,11 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage.jsx';
-import Dashboard from "./pages/DashboardPage.jsx";
+import DashboardPage from "./pages/DashboardPage.jsx";
 import ForgotPassword from './pages/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword.jsx';
 import ProtectRoute from './components/ProtectedRoute.jsx';
+
 function App() {
   
 
@@ -19,7 +20,7 @@ function App() {
           element={
             <ProtectRoute>
               {" "}
-              <Dashboard />
+              <DashboardPage />
             </ProtectRoute>
           }
         />

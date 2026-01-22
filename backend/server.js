@@ -1,17 +1,16 @@
 import express from 'express';
-import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 
 import authRoutes from './routes/auth.route.js';
+import binRoutes from './routes/bins.routes.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
@@ -23,6 +22,7 @@ app.get('/', (req, res) => {
   res.send('Smart Garbage Management System Backend is running.');
 });
 app.use("/api/auth", authRoutes);
+app.use("/api/bins", binRoutes);
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

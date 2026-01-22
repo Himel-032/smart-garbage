@@ -29,3 +29,40 @@ CREATE TRIGGER trigger_admins_updated_at
 BEFORE UPDATE ON admins
 FOR EACH ROW
 EXECUTE FUNCTION set_updated_at();
+
+
+-- 2️⃣ Drivers Table (with Cloudinary photo + login/password)
+CREATE TABLE drivers (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    email VARCHAR(100) UNIQUE NOT NULL,
+    photo_url VARCHAR(255),                   -- Cloudinary image URL
+    password VARCHAR(255) NOT NULL,      -- Hashed password for login
+    reset_token VARCHAR(255),                 -- For password reset
+    reset_token_expires TIMESTAMP,            -- Expiration time for reset token
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 3️⃣ Bins Table (assigned to drivers & areas)
+CREATE TABLE bins (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,                 -- Bin label/name
+    location VARCHAR(255),                       -- Optional address or description
+    driver_id INTEGER REFERENCES drivers(id) ON DELETE SET NULL, -- Assigned driver
+    capacity INTEGER NOT NULL DEFAULT 100,      -- Max capacity in liters
+    current_level INTEGER NOT NULL DEFAULT 0,   -- Current fill level
+    status VARCHAR(50) NOT NULL DEFAULT 'empty', -- empty, half-full, full, maintenance
+    latitude NUMERIC(10,7),                     -- Optional GPS
+    longitude NUMERIC(10,7),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 4️⃣ Bin Readings Table (for historical/monthly data & trends)
+CREATE TABLE bin_readings (
+    id SERIAL PRIMARY KEY,
+    bin_id INTEGER REFERENCES bins(id) ON DELETE CASCADE,
+    fill_level INTEGER NOT NULL,                -- Fill level at reading time
+    recorded_at TIMESTAMP DEFAULT NOW()         -- Timestamp of reading
+);

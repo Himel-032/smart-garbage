@@ -24,10 +24,6 @@ export const addBin = async (req, res) => {
       ],
     );
 
-    // Emit socket event for real-time update
-    const io = req.app.get('io');
-    io.emit('binAdded', result.rows[0]);
-
     res.status(201).json({ success: true, bin: result.rows[0] });
   } catch (err) {
     console.error(err.message);
@@ -89,10 +85,6 @@ export const deleteBin = async (req, res) => {
     if (result.rowCount === 0) {
       return res.status(404).json({ message: "Bin not found" });
     }
-
-    // Emit socket event for real-time update
-    const io = req.app.get('io');
-    io.emit('binDeleted', { id: binId });
 
     res.json({ message: "Bin deleted successfully", bin: result.rows[0] });
   } catch (error) {

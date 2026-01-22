@@ -7,6 +7,7 @@ import ResetPassword from './pages/ResetPassword.jsx';
 import ProtectRoute from './components/ProtectedRoute.jsx';
 
 import BinsPage from './pages/bins/BinsPage.jsx';
+import AddBin from './pages/bins/AddBin.jsx';
 
 function App() {
   
@@ -32,6 +33,15 @@ function App() {
             <ProtectRoute>
               {" "}
               <BinsPage />
+            </ProtectRoute>
+          }
+        />
+        <Route
+          path="/bins/add"
+          element={
+            <ProtectRoute>
+              {" "}
+              <AddBin />
             </ProtectRoute>
           }
         />

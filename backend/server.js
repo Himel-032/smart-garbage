@@ -5,6 +5,7 @@ import cors from 'cors';
 
 import authRoutes from './routes/auth.route.js';
 import binRoutes from './routes/bins.routes.js';
+import driverRoutes from './routes/drivers.route.js';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.get('/', (req, res) => {
 });
 app.use("/api/auth", authRoutes);
 app.use("/api/bins", binRoutes);
+app.use("/api/drivers", driverRoutes)
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

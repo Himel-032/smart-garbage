@@ -80,7 +80,7 @@ export default function Sidebar({ onToggle }) {
             }
             title={!isExpanded ? item.name : ""}
           >
-            <span className="flex-shrink-0">{item.icon}</span>
+            <span className="shrink-0">{item.icon}</span>
             {isExpanded && (
               <span className="whitespace-nowrap overflow-hidden">
                 {item.name}
@@ -97,7 +97,7 @@ export default function Sidebar({ onToggle }) {
           className="flex items-center gap-3 w-full px-3 py-3 rounded-lg hover:bg-red-600 hover:text-white transition"
           title={!isExpanded ? "Logout" : ""}
         >
-          <span className="flex-shrink-0">
+          <span className="shrink-0">
             <LogOut size={20} />
           </span>
           {isExpanded && (

@@ -7,6 +7,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  MapPin,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -35,7 +36,8 @@ export default function Sidebar({ onToggle }) {
       link: "/dashboard",
     },
     { name: "Drivers", icon: <Users size={20} />, link: "#" },
-    { name: "Trash Bins", icon: <Trash2 size={20} />, link: "#" },
+    { name: "Trash Bins", icon: <Trash2 size={20} />, link: "/bins" },
+    {name: "Map View", icon: <MapPin size={20} />, link: "#"},
     { name: "Analytics", icon: <BarChart3 size={20} />, link: "#" },
     { name: "Settings", icon: <Settings size={20} />, link: "#" },
   ];
@@ -80,7 +82,7 @@ export default function Sidebar({ onToggle }) {
             }
             title={!isExpanded ? item.name : ""}
           >
-            <span className="flex-shrink-0">{item.icon}</span>
+            <span className="shrink-0">{item.icon}</span>
             {isExpanded && (
               <span className="whitespace-nowrap overflow-hidden">
                 {item.name}
@@ -97,7 +99,7 @@ export default function Sidebar({ onToggle }) {
           className="flex items-center gap-3 w-full px-3 py-3 rounded-lg hover:bg-red-600 hover:text-white transition"
           title={!isExpanded ? "Logout" : ""}
         >
-          <span className="flex-shrink-0">
+          <span className="shrink-0">
             <LogOut size={20} />
           </span>
           {isExpanded && (

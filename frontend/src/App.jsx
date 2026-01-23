@@ -8,6 +8,7 @@ import ProtectRoute from './components/ProtectedRoute.jsx';
 
 import BinsPage from './pages/bins/BinsPage.jsx';
 import AddBin from './pages/bins/AddBin.jsx';
+import EditBin from './pages/bins/EditBin.jsx';
 
 function App() {
   
@@ -42,6 +43,15 @@ function App() {
             <ProtectRoute>
               {" "}
               <AddBin />
+            </ProtectRoute>
+          }
+        />
+        <Route
+          path="/bins/edit/:id"
+          element={
+            <ProtectRoute>
+              {" "}
+              <EditBin />
             </ProtectRoute>
           }
         />

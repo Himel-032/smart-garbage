@@ -58,6 +58,9 @@ CREATE TABLE bins (
     longitude NUMERIC(10,7),
     updated_at TIMESTAMP DEFAULT NOW()
 );
+ALTER TABLE bins
+ALTER COLUMN status SET DEFAULT 'working';
+
 
 -- 4️⃣ Bin Readings Table (for historical/monthly data & trends)
 CREATE TABLE bin_readings (

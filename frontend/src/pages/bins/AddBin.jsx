@@ -35,6 +35,14 @@ const AddBin = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+     if (name === "latitude" && (value < -90 || value > 90)) {
+       setError("Latitude must be between -90 and 90.");
+       return;
+     }
+     if (name === "longitude" && (value < -180 || value > 180)) {
+       setError("Longitude must be between -180 and 180.");
+       return;
+     }
     setFormData({ ...formData, [name]: value });
     setError("");
   };

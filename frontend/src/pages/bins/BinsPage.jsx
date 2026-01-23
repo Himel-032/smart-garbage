@@ -66,6 +66,9 @@ const BinsPage = () => {
       }
   }
   };
+  const handleEdit = (id) => {
+    navigate(`/bins/edit/${id}`);
+  }
 
   if (loading) {
     return (
@@ -122,7 +125,7 @@ const BinsPage = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {displayedBins.map((bin) => (
-              <BinCard key={bin.id} bin={bin} onDelete={handleDelete} />
+              <BinCard key={bin.id} bin={bin} onDelete={handleDelete} onEdit={handleEdit} />
             ))}
           </div>
         )}

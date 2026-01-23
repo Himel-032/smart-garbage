@@ -37,7 +37,7 @@ export default function Sidebar({ onToggle }) {
     },
     { name: "Drivers", icon: <Users size={20} />, link: "#" },
     { name: "Trash Bins", icon: <Trash2 size={20} />, link: "/bins" },
-    {name: "Map View", icon: <MapPin size={20} />, link: "#"},
+    {name: "Map View", icon: <MapPin size={20} />, link: "/map"},
     { name: "Analytics", icon: <BarChart3 size={20} />, link: "#" },
     { name: "Settings", icon: <Settings size={20} />, link: "#" },
   ];

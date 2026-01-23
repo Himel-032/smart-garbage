@@ -9,6 +9,7 @@ import ProtectRoute from './components/ProtectedRoute.jsx';
 import BinsPage from './pages/bins/BinsPage.jsx';
 import AddBin from './pages/bins/AddBin.jsx';
 import EditBin from './pages/bins/EditBin.jsx';
+import BinsMapPage from './pages/maps/BinsMapPage.jsx';
 
 function App() {
   
@@ -55,10 +56,19 @@ function App() {
             </ProtectRoute>
           }
         />
+        <Route
+          path="/map"
+          element={
+            <ProtectRoute>
+              {" "}
+              <BinsMapPage />
+            </ProtectRoute>
+          }
+        />
         <Route path="*" element={<LoginPage />} />
       </Routes>
     </Router>
   );
 }
 
-export default App
+export default App;

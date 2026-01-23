@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+/* Leaflet Map Styles */
+.custom-marker,
+.custom-bin-marker {
+  background: transparent;
+  border: none;
+}
+
+.custom-bin-marker {
+  filter: drop-shadow(2px 3px 3px rgba(0, 0, 0, 0.3));
+  transition: transform 0.2s ease;
+}
+
+.custom-bin-marker:hover {
+  transform: scale(1.1);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.leaflet-popup-content {
+  margin: 12px;
+}

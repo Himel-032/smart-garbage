@@ -1,7 +1,7 @@
 import React from "react";
 import { Trash2, MapPin, User, Droplets, Gauge,Edit2 } from "lucide-react";
 
-const BinCard = ({ bin }) => {
+const BinCard = ({ bin, onDelete }) => {
   // Calculate fill percentage
   const fillPercentage = Math.round((bin.current_level / bin.capacity) * 100);
 
@@ -132,6 +132,7 @@ const BinCard = ({ bin }) => {
         <button
           
           className="flex-1 flex items-center justify-center gap-2 p-2 bg-orange-500 hover:bg-red-600 text-white rounded-md transition"
+          onClick={() => onDelete(bin.id)}
         >
           <Trash2 size={16} /> Delete
         </button>

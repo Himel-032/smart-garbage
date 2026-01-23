@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllBins } from "../../api/bins.js";
+import { getAllBins, deleteBin } from "../../api/bins.js";
 import BinCard from "../../components/bins/BinCard.jsx";
 import Button from "../../components/bins/Button.jsx";
 import DashboardLayout from "../../layouts/DashboardLayout.jsx";
@@ -55,6 +55,18 @@ const BinsPage = () => {
     }
   }, [search, filterLocation, showAll, bins]);
 
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this bin?")) {
+      try {
+        await deleteBin(id);
+        fetchBins();
+      } catch (err) {
+        console.error("Error deleting bin:", err);
+        alert("Failed to delete bin. Please try again.");
+      }
+  }
+  };
+
   if (loading) {
     return (
       <DashboardLayout>
@@ -95,7 +107,7 @@ const BinsPage = () => {
           >
             <option value="">All Locations</option>
             {areas.map((area) => (
-              <option key={area} value={area}>
+              <option key={area} value={area} >
                 {area}
               </option>
             ))}
@@ -110,7 +122,7 @@ const BinsPage = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {displayedBins.map((bin) => (
-              <BinCard key={bin.id} bin={bin} />
+              <BinCard key={bin.id} bin={bin} onDelete={handleDelete} />
             ))}
           </div>
         )}

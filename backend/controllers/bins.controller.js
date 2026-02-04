@@ -45,6 +45,17 @@ export const getAllBins = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
+export const getAllUnassignedBins = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM bins WHERE driver_id IS NULL ORDER BY id ASC`,
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
 
 export const getBinById = async (req, res) => {
   const { id } = req.params;

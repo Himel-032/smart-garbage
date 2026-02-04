@@ -142,15 +142,30 @@ export const assignBins = async (req, res) => {
   try {
     const { driver_id, bin_ids } = req.body;
     if (!driver_id || !Array.isArray(bin_ids)) {
-      return res.status(400).json({ message: "driver_id and bin_ids are required" });
+      return res
+        .status(400)
+        .json({ message: "driver_id and bin_ids are required" });
     }
-     if (bin_ids.length > 0) {
+    // STEP 1: Remove bins that were deselected
+    await pool.query(
+      `UPDATE bins 
+       SET driver_id = NULL 
+       WHERE driver_id = $1 
+       AND id != ALL($2::int[])`,
+      [driver_id, bin_ids],
+    );
+
+    // STEP 2: Assign selected bins
+    if (bin_ids.length > 0) {
       await pool.query(
-        `UPDATE bins SET driver_id=$1 WHERE id = ANY($2::int[]) AND (driver_id IS NULL OR driver_id = $1)`,
+        `UPDATE bins 
+         SET driver_id = $1 
+         WHERE id = ANY($2::int[]) 
+         AND (driver_id IS NULL OR driver_id = $1)`,
         [driver_id, bin_ids],
       );
     }
-    res.json({ message: "Bins assigned successfully" }); 
+    res.json({ message: "Bins assigned successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error: Assigning bins failed" });

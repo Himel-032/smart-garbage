@@ -10,5 +10,20 @@ const api = axios.create({
 export const getAllDrivers = () => {
   return api.get("/");
 };
+export const createDriver = (driverData) => {
+  return api.post("/", driverData);
+};
+export const getDriverById = (id) => {
+  return api.get(`/${id}`);
+};
+export const updateDriver = (id, driverData) => {
+  return api.put(`/${id}`, driverData);
+};
+export const assignBins = ({id, bins}) => {
+  return api.put("/assign/bins", {driver_id: id, bin_ids: bins});
+};
+export const deleteDriver = (id) => {
+  return api.delete(`/${id}`);
+};
 
 

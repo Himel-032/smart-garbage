@@ -47,10 +47,10 @@ export default function Sidebar({ onToggle }) {
     { 
       name: "Drivers", 
       icon: <Users size={20} />, 
-      link: "#" ,
+      link: "/drivers",
       children: [
-        { name: "All Drivers", link: "#" },
-        { name: "Add Driver", link: "#" },
+        { name: "All Drivers", link: "/drivers" },
+        { name: "Add Driver", link: "/drivers/add" },
       ]
   
     },
@@ -87,29 +87,18 @@ export default function Sidebar({ onToggle }) {
       <nav className="flex-1 px-3 py-6 space-y-2">
         {menuItems.map((item, index) => (
           <div key={index}>
-            <NavLink
-              to={item.link}
-              onClick={(e) => {
-                if (item.link === "#") {
-                  e.preventDefault();
-                  if (item.children) {
-                    toggleSubMenu(item.name);
-                  }
-                }
-              }}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-3 rounded-lg transition
-                ${isActive && item.link !== "#" ? "bg-emerald-700 text-white" : "hover:bg-emerald-800"}`
-              }
-              title={!isExpanded ? item.name : ""}
-            >
-              <span className="shrink-0">{item.icon}</span>
-              {isExpanded && (
-                <>
-                  <span className="whitespace-nowrap overflow-hidden flex-1">
-                    {item.name}
-                  </span>
-                  {item.children && (
+            {item.children ? (
+              <button
+                onClick={() => toggleSubMenu(item.name)}
+                className="flex items-center gap-3 px-3 py-3 rounded-lg transition hover:bg-emerald-800 w-full text-left"
+                title={!isExpanded ? item.name : ""}
+              >
+                <span className="shrink-0">{item.icon}</span>
+                {isExpanded && (
+                  <>
+                    <span className="whitespace-nowrap overflow-hidden flex-1">
+                      {item.name}
+                    </span>
                     <span className="shrink-0">
                       {expandedMenus[item.name] ? (
                         <ChevronUp size={16} />
@@ -117,11 +106,27 @@ export default function Sidebar({ onToggle }) {
                         <ChevronDown size={16} />
                       )}
                     </span>
-                  )}
-                </>
-              )}
-            </NavLink>
-            
+                  </>
+                )}
+              </button>
+            ) : (
+              <NavLink
+                to={item.link}
+                className={({ isActive }) =>
+                  `flex items-center gap-3 px-3 py-3 rounded-lg transition
+                  ${isActive && item.link !== "#" ? "bg-emerald-700 text-white" : "hover:bg-emerald-800"}`
+                }
+                title={!isExpanded ? item.name : ""}
+              >
+                <span className="shrink-0">{item.icon}</span>
+                {isExpanded && (
+                  <span className="whitespace-nowrap overflow-hidden flex-1">
+                    {item.name}
+                  </span>
+                )}
+              </NavLink>
+            )}
+
             {/* Submenu */}
             {item.children && expandedMenus[item.name] && isExpanded && (
               <div className="flex flex-col pl-8 mt-1 space-y-1">

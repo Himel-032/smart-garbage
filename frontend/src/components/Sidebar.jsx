@@ -7,6 +7,8 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   MapPin,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
@@ -16,6 +18,7 @@ import { useState } from "react";
 export default function Sidebar({ onToggle }) {
   const { logoutAdmin } = useAuth();
   const [isExpanded, setIsExpanded] = useState(true);
+  const [expandedMenus, setExpandedMenus] = useState({});
 
   const handleLogout = () => {
     const confirmed = window.confirm("Do you want to logout?");
@@ -28,6 +31,12 @@ export default function Sidebar({ onToggle }) {
     setIsExpanded(!isExpanded);
     if (onToggle) onToggle(!isExpanded);
   };
+    const toggleSubMenu = (menuName) => {
+      setExpandedMenus((prev) => ({
+        ...prev,
+        [menuName]: !prev[menuName],
+      }));
+    };
 
   const menuItems = [
     {
@@ -35,7 +44,16 @@ export default function Sidebar({ onToggle }) {
       icon: <LayoutDashboard size={20} />,
       link: "/dashboard",
     },
-    { name: "Drivers", icon: <Users size={20} />, link: "#" },
+    { 
+      name: "Drivers", 
+      icon: <Users size={20} />, 
+      link: "#" ,
+      children: [
+        { name: "All Drivers", link: "#" },
+        { name: "Add Driver", link: "#" },
+      ]
+  
+    },
     { name: "Trash Bins", icon: <Trash2 size={20} />, link: "/bins" },
     {name: "Map View", icon: <MapPin size={20} />, link: "/map"},
     { name: "Analytics", icon: <BarChart3 size={20} />, link: "#" },
@@ -68,27 +86,65 @@ export default function Sidebar({ onToggle }) {
       {/* Navigation */}
       <nav className="flex-1 px-3 py-6 space-y-2">
         {menuItems.map((item, index) => (
-          <NavLink
-            key={index}
-            to={item.link}
-            onClick={(e) => {
-              if (item.link === "#") {
-                e.preventDefault();
+          <div key={index}>
+            <NavLink
+              to={item.link}
+              onClick={(e) => {
+                if (item.link === "#") {
+                  e.preventDefault();
+                  if (item.children) {
+                    toggleSubMenu(item.name);
+                  }
+                }
+              }}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-3 rounded-lg transition
+                ${isActive && item.link !== "#" ? "bg-emerald-700 text-white" : "hover:bg-emerald-800"}`
               }
-            }}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-3 rounded-lg transition
-              ${isActive && item.link !== "#" ? "bg-emerald-700 text-white" : "hover:bg-emerald-800"}`
-            }
-            title={!isExpanded ? item.name : ""}
-          >
-            <span className="shrink-0">{item.icon}</span>
-            {isExpanded && (
-              <span className="whitespace-nowrap overflow-hidden">
-                {item.name}
-              </span>
+              title={!isExpanded ? item.name : ""}
+            >
+              <span className="shrink-0">{item.icon}</span>
+              {isExpanded && (
+                <>
+                  <span className="whitespace-nowrap overflow-hidden flex-1">
+                    {item.name}
+                  </span>
+                  {item.children && (
+                    <span className="shrink-0">
+                      {expandedMenus[item.name] ? (
+                        <ChevronUp size={16} />
+                      ) : (
+                        <ChevronDown size={16} />
+                      )}
+                    </span>
+                  )}
+                </>
+              )}
+            </NavLink>
+            
+            {/* Submenu */}
+            {item.children && expandedMenus[item.name] && isExpanded && (
+              <div className="flex flex-col pl-8 mt-1 space-y-1">
+                {item.children.map((child, cIndex) => (
+                  <NavLink
+                    key={cIndex}
+                    to={child.link}
+                    onClick={(e) => {
+                      if (child.link === "#") {
+                        e.preventDefault();
+                      }
+                    }}
+                    className={({ isActive }) =>
+                      `flex items-center px-3 py-2 rounded-lg text-sm transition
+                      ${isActive && child.link !== "#" ? "bg-emerald-700 text-white" : "hover:bg-emerald-800"}`
+                    }
+                  >
+                    {child.name}
+                  </NavLink>
+                ))}
+              </div>
             )}
-          </NavLink>
+          </div>
         ))}
       </nav>
 

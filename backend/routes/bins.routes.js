@@ -5,6 +5,7 @@ import {
   deleteBin,
   updateBin,
   getBinById,
+  getAllUnassignedBins,
 } from "../controllers/bins.controller.js";
 import { protectRoute } from "../middleware/protectRoute.js";
 
@@ -13,6 +14,7 @@ const router = express.Router();
 
 router.post("/add", protectRoute, addBin); // Add bin
 router.get("/", protectRoute, getAllBins); // Get all bins
+router.get("/unassigned", protectRoute, getAllUnassignedBins); // Get all unassigned bins
 router.get("/:id", protectRoute, getBinById); // Get bin by ID
 router.delete("/:id", protectRoute, deleteBin); // Delete bin
 router.put("/:id", protectRoute, updateBin); // Update bin

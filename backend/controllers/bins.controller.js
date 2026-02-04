@@ -6,7 +6,8 @@ export const addBin = async (req, res) => {
   try {
     const { name, location, driver_id, capacity, latitude, longitude } =
       req.body;
-    const driverIdValue = driver_id !== undefined ? parseInt(driver_id) : null;
+    const driverIdValue = driver_id && !isNaN(parseInt(driver_id)) ? parseInt(driver_id) : null;
+
     const capacityValue = capacity !== undefined ? parseInt(capacity) : 100;
     const latitudeValue = latitude !== undefined ? parseFloat(latitude) : null;
     const longitudeValue =
@@ -27,7 +28,7 @@ export const addBin = async (req, res) => {
     res.status(201).json({ success: true, bin: result.rows[0] });
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "sServer error" });
   }
 };
 
@@ -38,6 +39,17 @@ export const getAllBins = async (req, res) => {
        FROM bins b
        LEFT JOIN drivers d ON b.driver_id = d.id
        ORDER BY b.id ASC`,
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+export const getAllUnassignedBins = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM bins WHERE driver_id IS NULL ORDER BY id ASC`,
     );
     res.json(result.rows);
   } catch (error) {
@@ -124,8 +136,9 @@ export const updateBin = async (req, res) => {
 
     const bin = rows[0];
     // Parse numeric fields safely
-    const driverIdValue =
-      driver_id !== undefined ? parseInt(driver_id) : bin.driver_id;
+    
+      const driverIdValue =
+        driver_id && !isNaN(parseInt(driver_id)) ? parseInt(driver_id) : null;
     const capacityValue =
       capacity !== undefined ? parseInt(capacity) : bin.capacity;
     const currentLevelValue =

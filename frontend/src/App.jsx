@@ -9,6 +9,11 @@ import ProtectRoute from './components/ProtectedRoute.jsx';
 import BinsPage from './pages/bins/BinsPage.jsx';
 import AddBin from './pages/bins/AddBin.jsx';
 import EditBin from './pages/bins/EditBin.jsx';
+import BinsMapPage from './pages/maps/BinsMapPage.jsx';
+import DriversPage from './pages/drivers/DriversPage.jsx';
+import AddDriver from './pages/drivers/AddDriver.jsx';
+import EditDriver from './pages/drivers/EditDriver.jsx';
+import DriverDetailPage from './pages/drivers/DriverDetailPage.jsx';
 
 function App() {
   
@@ -25,6 +30,42 @@ function App() {
             <ProtectRoute>
               {" "}
               <DashboardPage />
+            </ProtectRoute>
+          }
+        />
+        <Route
+          path="/drivers"
+          element={
+            <ProtectRoute>
+              {" "}
+              <DriversPage />
+            </ProtectRoute>
+          }
+        />
+        <Route
+          path="/drivers/add"
+          element={
+            <ProtectRoute>
+              {" "}
+              <AddDriver />
+            </ProtectRoute>
+          }
+        />
+        <Route
+          path="/drivers/edit/:id"
+          element={
+            <ProtectRoute>
+              {" "}
+              <EditDriver />
+            </ProtectRoute>
+          }
+        />
+        <Route
+          path="/drivers/detail/:id"
+          element={
+            <ProtectRoute>
+              {" "}
+              <DriverDetailPage />
             </ProtectRoute>
           }
         />
@@ -55,10 +96,19 @@ function App() {
             </ProtectRoute>
           }
         />
+        <Route
+          path="/map"
+          element={
+            <ProtectRoute>
+              {" "}
+              <BinsMapPage />
+            </ProtectRoute>
+          }
+        />
         <Route path="*" element={<LoginPage />} />
       </Routes>
     </Router>
   );
 }
 
-export default App
+export default App;

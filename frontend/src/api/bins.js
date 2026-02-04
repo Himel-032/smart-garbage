@@ -10,6 +10,9 @@ const api = axios.create({
 export const getAllBins = () => {
   return api.get("/");
 };
+export const getAllUnassignedBins = () => {
+  return api.get("/unassigned");
+}
 
 export const getBinById = (id) => {
   return api.get(`/${id}`);

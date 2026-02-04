@@ -44,6 +44,8 @@ CREATE TABLE drivers (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW()
 );
+ALTER TABLE drivers
+ADD COLUMN status VARCHAR(50) DEFAULT 'pending';
 
 -- 3️⃣ Bins Table (assigned to drivers & areas)
 CREATE TABLE bins (

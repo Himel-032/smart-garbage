@@ -13,11 +13,18 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cookieParser());
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173", // React dev server
+//     credentials: true, // allow cookies to be sent
+//   })
+// );
+
 app.use(
   cors({
-    origin: "http://localhost:5173", // React dev server
-    credentials: true, // allow cookies to be sent
-  })
+    origin: ["http://localhost:5173", process.env.CLIENT_URL],
+    credentials: true,
+  }),
 );
 app.get('/', (req, res) => {
   res.send('Smart Garbage Management System Backend is running.');

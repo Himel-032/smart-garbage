@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 
 const ForgotPassword = () => {
+  const API_URL = import.meta.env.VITE_API_URL + 'api/auth/forgot-password';
     const [email, setEmail] = useState('');
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
@@ -14,7 +15,12 @@ const ForgotPassword = () => {
         setError("");
         setMessage("");
         try {
-            const res = await axios.post('http://localhost:5000/api/auth/forgot-password', { email }, { withCredentials: true });
+            // const res = await axios.post('http://localhost:5000/api/auth/forgot-password', { email }, { withCredentials: true });
+            const res = await axios.post(
+              API_URL,
+              { email },
+              { withCredentials: true },
+            );
             setMessage(res.data.message);
         } catch(err) {
             console.error('Forgot password error:', err);

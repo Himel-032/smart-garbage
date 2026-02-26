@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 
 const ResetPassword = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const { token } = useParams();
   const navigate = useNavigate();
 
@@ -16,7 +17,11 @@ const ResetPassword = () => {
   useEffect(() => {
     const validateToken = async () => {
         try {
-            await axios.get(`http://localhost:5000/api/auth/validate-reset-token/${token}`, { withCredentials: true });
+            // await axios.get(`http://localhost:5000/api/auth/validate-reset-token/${token}`, { withCredentials: true });
+            await axios.get(
+              `${API_URL}api/auth/validate-reset-token/${token}`,
+              { withCredentials: true },
+            );
             setValidating(false);
         } catch (err) {
             setError('Invalid or expired token');
@@ -46,9 +51,14 @@ const ResetPassword = () => {
     setLoading(true);
     setMessage("");
     try {
+      // const res = await axios.post(
+      //   `http://localhost:5000/api/auth/reset-password/${token}`,
+      //   { newPassword:password },
+      //   { withCredentials: true },
+      // );
       const res = await axios.post(
-        `http://localhost:5000/api/auth/reset-password/${token}`,
-        { newPassword:password },
+        `${API_URL}api/auth/reset-password/${token}`,
+        { newPassword: password },
         { withCredentials: true },
       );
       setMessage(res.data.message);

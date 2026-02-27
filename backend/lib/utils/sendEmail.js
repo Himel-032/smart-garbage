@@ -37,8 +37,10 @@ export const sendEmail = async ({ to, subject, html }) => {
     };
 
     const response = await sgMail.send(msg);
-    console.log("Email sent:", response[0].statusCode);
+    console.log("Email sent successfully:", response[0].statusCode);
+    return response;
   } catch (error) {
     console.error("SendGrid error:", error.response?.body || error);
+    throw new Error("Failed to send email");
   }
 };

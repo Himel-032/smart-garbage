@@ -189,9 +189,9 @@ export const receiveBinData = async (req, res) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const { device_id, weight_kg, distance_cm } = req.body;
+  const { device_name, weight_gm, distance_cm } = req.body;
 
-  console.log(device_id, weight_kg, distance_cm);
+  console.log(device_name, weight_gm, distance_cm);
 
   res.json({ status: "received" });
 };

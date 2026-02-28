@@ -181,3 +181,17 @@ export const updateBin = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+export const receiveBinData = async (req, res) => {
+  const auth = req.headers.authorization;
+
+  if (auth !== process.env.BIN_AUTH_TOKEN) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  const { device_id, weight_kg, distance_cm } = req.body;
+
+  console.log(device_id, weight_kg, distance_cm);
+
+  res.json({ status: "received" });
+};

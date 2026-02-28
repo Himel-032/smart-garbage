@@ -6,6 +6,7 @@ import {
   updateBin,
   getBinById,
   getAllUnassignedBins,
+  receiveBinData,
 } from "../controllers/bins.controller.js";
 import { protectRoute } from "../middleware/protectRoute.js";
 
@@ -18,5 +19,6 @@ router.get("/unassigned", protectRoute, getAllUnassignedBins); // Get all unassi
 router.get("/:id", protectRoute, getBinById); // Get bin by ID
 router.delete("/:id", protectRoute, deleteBin); // Delete bin
 router.put("/:id", protectRoute, updateBin); // Update bin
+router.post("/data", receiveBinData); // Endpoint for receiving bin data from devices
 
 export default router;

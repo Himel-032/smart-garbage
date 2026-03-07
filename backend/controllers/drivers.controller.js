@@ -213,11 +213,11 @@ export const loginDriver = async (req, res) => {
       return res.status(400).json({ message: "Email and Password required" });
     }
     const driver = await pool.query(
-      "SELECT * FROM drivers WHERE email = $1",
+      "SELECT * FROM drivers WHERE email = $1 and status = 'active'",
       [email]
     );
     if (driver.rows.length === 0) {
-      return res.status(404).json({ message: "Driver not found" });
+      return res.status(404).json({ message: "Driver not found or status is not active" });
     }
     const isMatch = await bcrypt.compare(password, driver.rows[0].password);
     if (!isMatch) {
@@ -272,12 +272,12 @@ export const driverForgotPassword = async (req, res) => {
   try {
     // 1️⃣ Check if driver exists
     const driverResult = await pool.query(
-      "SELECT id, email FROM drivers WHERE email=$1",
+      "SELECT id, email FROM drivers WHERE email=$1 AND status='active'",
       [email],
     );
 
     if (driverResult.rows.length === 0) {
-      return res.status(404).json({ message: "Driver not found" });
+      return res.status(404).json({ message: "Driver not found or status is not active" });
     }
 
     const driver = driverResult.rows[0];

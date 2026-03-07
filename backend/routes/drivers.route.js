@@ -6,10 +6,24 @@ import {
   updateDriver,
   assignBins,
   deleteDriver,
+  loginDriver,
+  driverHome,
+  logoutDriver,
+  driverForgotPassword,
+  driverResetPassword,
+  validateDriverResetToken
 } from "../controllers/drivers.controller.js";
 import { protectRoute } from "../middleware/protectRoute.js";
+import { authenticateDriver } from "../middleware/driverAuth.js";
 import upload from "../config/multer.js";
 const router = express.Router();
+
+router.post("/login", loginDriver);
+router.post("/logout", authenticateDriver, logoutDriver);
+router.get("/home", authenticateDriver, driverHome);
+router.post("/forgot-password", driverForgotPassword);
+router.post("/reset-password/:token", driverResetPassword);
+router.get("/validate-reset-token/:token", validateDriverResetToken);
 
 router.get("/", protectRoute, getAllDrivers);
 router.post("/", upload.single("photo"), protectRoute, createDriver);

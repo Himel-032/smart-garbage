@@ -1,10 +1,13 @@
 import pool from "../db.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import { sendEmail } from "../lib/utils/sendEmail.js";
 import {
   uploadToCloudinary,
   deleteFromCloudinaryByUrl,
 } from "../config/cloudinaryUpload.js";
-
+import { authenticateDriver } from "../middleware/driverAuth.js";
 export const getAllDrivers = async (req, res) => {
   try {
     const result = await pool.query(`
@@ -202,3 +205,175 @@ export const deleteDriver = async (req, res) => {
     res.status(500).json({ message: "Server error: Deleting driver failed" });
   }
 };
+
+export const loginDriver = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and Password required" });
+    }
+    const driver = await pool.query(
+      "SELECT * FROM drivers WHERE email = $1",
+      [email]
+    );
+    if (driver.rows.length === 0) {
+      return res.status(404).json({ message: "Driver not found" });
+    }
+    const isMatch = await bcrypt.compare(password, driver.rows[0].password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    const token = jwt.sign(
+      { id: driver.rows[0].id, email: driver.rows[0].email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+    res.json({ message: "Login successful", token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error: Logging in failed" });
+  }
+};
+
+export const driverHome = async ( req, res ) => {
+  try {
+    const driverId = req.driver.id;
+     const driver = await pool.query(
+      "SELECT id, name, email FROM drivers WHERE id = $1",
+      [driverId]
+    );
+    res.json({
+      message: "Welcome Driver",
+      driver: driver.rows[0],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error: Fetching driver data failed" });
+  }
+};
+
+export const logoutDriver = async (req, res) => {
+  try {
+    // JWT is stateless, so logout is just client-side deletion
+    // Optionally, you can also implement token blacklisting in DB if needed
+    res.json({
+      message:
+        "Driver logged out successfully. Please delete the token on the client.",
+    });
+  } catch (error) {
+    console.error("Driver logout error:", error);
+    res.status(500).json({ message: "Driver logout failed" });
+  }
+};
+
+export const driverForgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    // 1️⃣ Check if driver exists
+    const driverResult = await pool.query(
+      "SELECT id, email FROM drivers WHERE email=$1",
+      [email],
+    );
+
+    if (driverResult.rows.length === 0) {
+      return res.status(404).json({ message: "Driver not found" });
+    }
+
+    const driver = driverResult.rows[0];
+
+    // generate reset token
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        // hash token before saving to db
+        const hashedToken = crypto
+            .createHash("sha256")
+            .update(resetToken)
+            .digest("hex");
+
+    // 3️⃣ Store token and expiry in DB
+    await pool.query(
+      "UPDATE drivers SET reset_token=$1, reset_token_expires=NOW() + interval '15 minutes' WHERE email=$2",
+      [hashedToken, email],
+    );
+
+    // 4️⃣ Create reset link (can open web page or deep link in app)
+    // const resetLink = `https://yourapp.up.railway.app/reset-password?token=${resetToken}`;
+    const resetLink = `${process.env.FRONTEND_URL}/driver/reset-password/${resetToken}`;
+
+    // 5️⃣ Send email using SendGrid
+    await sendEmail({
+      to: driver.email,
+      subject: "Reset Your Password",
+      html: `<p>Hi,</p>
+             <p>Click the link below to reset your password:</p>
+             <a href="${resetLink}">Reset Password</a>
+             <p>This link will expire in 15 minutes.</p>`,
+    });
+
+    res.json({ message: "Password reset email sent" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to send password reset email" });
+  }
+};
+
+export const driverResetPassword = async (req, res) => {
+  const { token } = req.params;
+  const { newPassword } = req.body;
+
+  try {
+    // hash received token
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    // find driver with matching token and valid expiry
+    const result = await pool.query(
+      `SELECT * FROM drivers 
+       WHERE reset_token = $1 
+       AND reset_token_expires > NOW()`,
+      [hashedToken],
+    );
+    if (result.rows.length === 0) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+    // update password & clear reset token fields
+    const driver = result.rows[0];
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await pool.query(
+      `UPDATE drivers 
+       SET password = $1,
+           reset_token = NULL,
+           reset_token_expires = NULL
+       WHERE id = $2`,
+      [hashedPassword, result.rows[0].id],
+    );
+    res.json({ message: "Password reset successful" });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const validateDriverResetToken = async (req, res) => {
+  const { token } = req.params;
+  try {
+    // hash received token
+    const hashedToken = crypto
+        .createHash("sha256")
+        .update(token)
+        .digest("hex");
+    // find driver with matching token and valid expiry
+    const result = await pool.query(
+      `SELECT * FROM drivers 
+       WHERE reset_token = $1
+        AND reset_token_expires > NOW()`,
+      [hashedToken]
+    );
+    if (result.rows.length === 0) {
+      return res.status(400).json({ message: "Invalid or expired token" });
+    }
+    res.json({valid: true});
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+

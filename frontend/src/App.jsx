@@ -14,6 +14,7 @@ import DriversPage from './pages/drivers/DriversPage.jsx';
 import AddDriver from './pages/drivers/AddDriver.jsx';
 import EditDriver from './pages/drivers/EditDriver.jsx';
 import DriverDetailPage from './pages/drivers/DriverDetailPage.jsx';
+import DriverResetPassword from './pages/drivers/DriverResetPassword.jsx';
 
 function App() {
   
@@ -24,6 +25,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/driver/reset-password/:token" element={<DriverResetPassword />} />
         <Route
           path="/dashboard"
           element={

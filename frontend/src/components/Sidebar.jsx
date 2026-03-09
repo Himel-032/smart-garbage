@@ -10,6 +10,7 @@ import {
   ChevronDown,
   ChevronUp,
   MapPin,
+  MessageCircle,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -54,6 +55,7 @@ export default function Sidebar({ onToggle }) {
       ]
   
     },
+    { name: "Messages", icon: <MessageCircle size={20} />, link: "/messages" },
     { name: "Trash Bins", icon: <Trash2 size={20} />, link: "/bins" },
     {name: "Map View", icon: <MapPin size={20} />, link: "/map"},
     { name: "Analytics", icon: <BarChart3 size={20} />, link: "#" },

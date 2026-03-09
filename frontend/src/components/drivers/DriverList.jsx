@@ -11,6 +11,7 @@ import {
   XCircle,
   Clock,
   Eye,
+  MessageCircle,
 } from "lucide-react";
 
 function DriverList({ drivers, onEdit, onDelete, onAssignBins }) {
@@ -113,6 +114,17 @@ function DriverList({ drivers, onEdit, onDelete, onAssignBins }) {
             >
               <Eye size={18} />
               <span>View</span>
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/messages/${driver.id}`);
+              }}
+              className="flex flex-col items-center justify-center gap-1 bg-purple-50 text-purple-700 py-2 px-2 rounded-lg hover:bg-purple-100 transition text-xs font-medium"
+              title="Send Message"
+            >
+              <MessageCircle size={18} />
+              <span>Message</span>
             </button>
             <button
               onClick={(e) => {

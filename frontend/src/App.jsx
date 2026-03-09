@@ -15,6 +15,8 @@ import AddDriver from './pages/drivers/AddDriver.jsx';
 import EditDriver from './pages/drivers/EditDriver.jsx';
 import DriverDetailPage from './pages/drivers/DriverDetailPage.jsx';
 import DriverResetPassword from './pages/drivers/DriverResetPassword.jsx';
+import MessagesPage from './pages/messages/MessagesPage.jsx';
+import ConversationPage from './pages/messages/ConversationPage.jsx';
 
 function App() {
   
@@ -104,6 +106,24 @@ function App() {
             <ProtectRoute>
               {" "}
               <BinsMapPage />
+            </ProtectRoute>
+          }
+        />
+        <Route
+          path="/messages"
+          element={
+            <ProtectRoute>
+              {" "}
+              <MessagesPage />
+            </ProtectRoute>
+          }
+        />
+        <Route
+          path="/messages/:driverId"
+          element={
+            <ProtectRoute>
+              {" "}
+              <ConversationPage />
             </ProtectRoute>
           }
         />

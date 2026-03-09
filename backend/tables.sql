@@ -71,3 +71,14 @@ CREATE TABLE bin_readings (
     fill_level INTEGER NOT NULL,                -- Fill level at reading time
     recorded_at TIMESTAMP DEFAULT NOW()         -- Timestamp of reading
 );
+
+CREATE TABLE messages (
+    id SERIAL PRIMARY KEY,
+    sender_role VARCHAR(50) NOT NULL,       -- 'admin' or 'driver'
+    sender_id INT NOT NULL,
+    receiver_role VARCHAR(50) NOT NULL,     
+    receiver_id INT NOT NULL,
+    content TEXT NOT NULL,
+    read_status BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
+);

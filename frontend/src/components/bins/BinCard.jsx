@@ -3,7 +3,8 @@ import { Trash2, MapPin, User, Droplets, Gauge,Edit2 } from "lucide-react";
 
 const BinCard = ({ bin, onDelete, onEdit }) => {
   // Calculate fill percentage
-  const fillPercentage = Math.round((bin.current_level / bin.capacity) * 100);
+  // const fillPercentage = Math.round((bin.current_level / bin.capacity) * 100);
+  const fillPercentage = bin.current_level;
 
   // Determine status based on fill level
   const getStatus = () => {

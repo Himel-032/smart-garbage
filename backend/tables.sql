@@ -82,3 +82,22 @@ CREATE TABLE messages (
     read_status BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT NOW()
 );
+
+
+CREATE OR REPLACE FUNCTION log_bin_reading()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO bin_readings (bin_id, fill_level)
+  VALUES (NEW.id, NEW.current_level);
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE TRIGGER trigger_log_bin_readings
+AFTER UPDATE OF current_level
+ON bins
+FOR EACH ROW
+EXECUTE FUNCTION log_bin_reading();

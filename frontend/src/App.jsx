@@ -17,6 +17,7 @@ import DriverDetailPage from './pages/drivers/DriverDetailPage.jsx';
 import DriverResetPassword from './pages/drivers/DriverResetPassword.jsx';
 import MessagesPage from './pages/messages/MessagesPage.jsx';
 import ConversationPage from './pages/messages/ConversationPage.jsx';
+import AnalyticsPage from './pages/analytics/AnalyticsPage.jsx';
 
 function App() {
   
@@ -124,6 +125,15 @@ function App() {
             <ProtectRoute>
               {" "}
               <ConversationPage />
+            </ProtectRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectRoute>
+              {" "}
+              <AnalyticsPage />
             </ProtectRoute>
           }
         />

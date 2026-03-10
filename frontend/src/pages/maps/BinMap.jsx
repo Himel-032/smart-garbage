@@ -175,7 +175,7 @@ const BinMap = () => {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             <FitBounds bins={validBins} />
-            
+
             {validBins.map((bin) => (
               <Marker
                 key={bin.id}
@@ -187,13 +187,19 @@ const BinMap = () => {
               >
                 <Popup>
                   <div className="min-w-[200px]">
-                    <h3 className="font-bold text-gray-800 text-lg mb-2">{bin.name}</h3>
+                    <h3 className="font-bold text-gray-800 text-lg mb-2">
+                      {bin.name}
+                    </h3>
                     <div className="space-y-1 text-sm">
-                      <p className="text-gray-600">📍 {bin.location || "No location"}</p>
+                      <p className="text-gray-600">
+                        📍 {bin.location || "No location"}
+                      </p>
                       <p className="text-gray-600">
                         📊 {bin.current_level || 0} / {bin.capacity} L
                       </p>
-                      <p className={`font-medium ${getStatusLabel(bin).textColor}`}>
+                      <p
+                        className={`font-medium ${getStatusLabel(bin).textColor}`}
+                      >
                         Status: {getStatusLabel(bin).text}
                       </p>
                       {bin.driver_name && (
@@ -231,13 +237,17 @@ const BinMap = () => {
                   ✕
                 </button>
               </div>
-              <p className="text-sm opacity-90">{getStatusLabel(selectedBin).text}</p>
+              <p className="text-sm opacity-90">
+                {getStatusLabel(selectedBin).text}
+              </p>
             </div>
 
             <div className="p-4 space-y-4">
               <div className="flex items-center gap-3 text-gray-600">
                 <MapPin className="w-5 h-5 text-gray-400 shrink-0" />
-                <span className="text-sm">{selectedBin.location || "No location"}</span>
+                <span className="text-sm">
+                  {selectedBin.location || "No location"}
+                </span>
               </div>
 
               <div className="flex items-center gap-3 text-gray-600">
@@ -260,8 +270,11 @@ const BinMap = () => {
                   <span>Fill Level</span>
                   <span>
                     {Math.round(
-                      ((selectedBin.current_level || 0) / (selectedBin.capacity || 100)) * 100
-                    )}%
+                      ((selectedBin.current_level || 0) /
+                        (selectedBin.capacity || 100)) *
+                        100,
+                    )}
+                    %
                   </span>
                 </div>
                 <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
@@ -269,8 +282,10 @@ const BinMap = () => {
                     className={`h-full ${getColorClass(selectedBin)}`}
                     style={{
                       width: `${Math.min(
-                        ((selectedBin.current_level || 0) / (selectedBin.capacity || 100)) * 100,
-                        100
+                        ((selectedBin.current_level || 0) /
+                          (selectedBin.capacity || 100)) *
+                          100,
+                        100,
                       )}%`,
                     }}
                   />
@@ -301,8 +316,12 @@ const BinMap = () => {
           /* Bins List */
           <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
             <div className="p-4 bg-gray-50 border-b border-gray-200">
-              <h3 className="font-semibold text-gray-800">All Bins ({validBins.length})</h3>
-              <p className="text-xs text-gray-500 mt-1">Click a marker or bin to view details</p>
+              <h3 className="font-semibold text-gray-800">
+                All Bins ({validBins.length})
+              </h3>
+              <p className="text-xs text-gray-500 mt-1">
+                Click a marker or bin to view details
+              </p>
             </div>
             <div className="max-h-[460px] overflow-y-auto">
               {validBins.map((bin) => (
@@ -312,13 +331,25 @@ const BinMap = () => {
                   className="p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition"
                 >
                   <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${getColorClass(bin)}`}></div>
+                    <div
+                      className={`w-3 h-3 rounded-full ${getColorClass(bin)}`}
+                    ></div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-800 text-sm truncate">{bin.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{bin.location || "No location"}</p>
+                      <p className="font-medium text-gray-800 text-sm truncate">
+                        {bin.name}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {bin.location || "No location"}
+                      </p>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full text-white ${getColorClass(bin)}`}>
-                      {Math.round(((bin.current_level || 0) / (bin.capacity || 100)) * 100)}%
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full text-white ${getColorClass(bin)}`}
+                    >
+                      {/* {Math.round(((bin.current_level || 0) / (bin.capacity || 100)) * 100)}% */}
+                      {Math.round(
+                        ((bin.current_level || 0))
+                      )}
+                      %
                     </span>
                   </div>
                 </div>

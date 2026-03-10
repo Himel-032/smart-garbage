@@ -11,6 +11,7 @@ import authRoutes from './routes/auth.route.js';
 import binRoutes from './routes/bins.routes.js';
 import driverRoutes from './routes/drivers.route.js';
 import messagesRoute from "./routes/messages.route.js";
+import analyticsRoutes from "./routes/analytics.route.js";
 
 dotenv.config();
 
@@ -39,6 +40,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/bins", binRoutes);
 app.use("/api/drivers", driverRoutes)
 app.use("/api/messages", messagesRoute);
+app.use("/api/analytics", analyticsRoutes);
 
 // ---------- Socket.IO Real-time Messaging ----------
 const io = new Server(server, { cors: { origin: "*" } });

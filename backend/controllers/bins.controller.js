@@ -6,7 +6,8 @@ export const addBin = async (req, res) => {
   try {
     const { name, location, driver_id, capacity, latitude, longitude } =
       req.body;
-    const driverIdValue = driver_id && !isNaN(parseInt(driver_id)) ? parseInt(driver_id) : null;
+    const driverIdValue =
+      driver_id && !isNaN(parseInt(driver_id)) ? parseInt(driver_id) : null;
 
     const capacityValue = capacity !== undefined ? parseInt(capacity) : 100;
     const latitudeValue = latitude !== undefined ? parseFloat(latitude) : null;
@@ -67,7 +68,9 @@ export const getBinById = async (req, res) => {
   }
 
   try {
-    const { rows } = await pool.query("SELECT * FROM bins WHERE id = $1", [binId]);
+    const { rows } = await pool.query("SELECT * FROM bins WHERE id = $1", [
+      binId,
+    ]);
 
     if (rows.length === 0) {
       return res.status(404).json({ message: "Bin not found" });
@@ -136,9 +139,9 @@ export const updateBin = async (req, res) => {
 
     const bin = rows[0];
     // Parse numeric fields safely
-    
-      const driverIdValue =
-        driver_id && !isNaN(parseInt(driver_id)) ? parseInt(driver_id) : null;
+
+    const driverIdValue =
+      driver_id && !isNaN(parseInt(driver_id)) ? parseInt(driver_id) : null;
     const capacityValue =
       capacity !== undefined ? parseInt(capacity) : bin.capacity;
     const currentLevelValue =
@@ -194,4 +197,18 @@ export const receiveBinData = async (req, res) => {
   console.log(device_name, weight_gm, distance_cm);
 
   res.json({ status: "received" });
+};
+
+export const getAssignedBins = async (req, res) => {
+  try {
+    const driverId = req.driver.id;
+    const result = await pool.query(
+      "SELECT * FROM bins WHERE driver_id = $1 ORDER BY id ASC",
+      [driverId],
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 };

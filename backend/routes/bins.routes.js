@@ -7,11 +7,15 @@ import {
   getBinById,
   getAllUnassignedBins,
   receiveBinData,
+  getAssignedBins,
 } from "../controllers/bins.controller.js";
 import { protectRoute } from "../middleware/protectRoute.js";
+import { authenticateDriver } from "../middleware/driverAuth.js";
 
 
 const router = express.Router();
+
+router.get("/assigned", authenticateDriver, getAssignedBins); // Get bins assigned to authenticated driver
 
 router.post("/add", protectRoute, addBin); // Add bin
 router.get("/", protectRoute, getAllBins); // Get all bins

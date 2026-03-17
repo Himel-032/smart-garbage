@@ -43,7 +43,11 @@ app.use("/api/messages", messagesRoute);
 app.use("/api/analytics", analyticsRoutes);
 
 // ---------- Socket.IO Real-time Messaging ----------
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server, 
+  { 
+    cors: { origin: "*" },
+    allowEIO3: true // Allow older Socket.IO clients (like from React Native) to connect
+  });
 
 io.use(async (socket, next) => {
   try {

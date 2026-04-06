@@ -18,6 +18,10 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
+
+// Required behind Render/Reverse proxy to correctly detect HTTPS.
+app.set("trust proxy", 1);
+
 app.use(express.json());
 app.use(cookieParser());
 // app.use(

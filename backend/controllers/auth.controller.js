@@ -6,6 +6,23 @@ import { sendEmail } from "../lib/utils/sendEmail.js";
 import dotenv from "dotenv";
 dotenv.config();
 
+const getCookieOptions = (req, maxAge) => {
+  const clientUrl = process.env.CLIENT_URL || "";
+  const isLocalClient = clientUrl.includes("localhost") || clientUrl.includes("127.0.0.1");
+  const isForwardedHttps = req.headers["x-forwarded-proto"] === "https";
+
+  // Cross-site cookies (Vercel -> Render) must be SameSite=None and Secure.
+  const secure = process.env.COOKIE_SECURE === "true" || (!isLocalClient && (req.secure || isForwardedHttps));
+  const sameSite = process.env.COOKIE_SAME_SITE || (secure ? "none" : "lax");
+
+  return {
+    httpOnly: true,
+    secure,
+    sameSite,
+    maxAge,
+  };
+};
+
 // Admin login
 export const loginAdmin = async (req, res) => {
   const { email, password } = req.body;
@@ -30,12 +47,7 @@ export const loginAdmin = async (req, res) => {
     //  Create JWT token
     const token = generateToken(admin);
 
-    res.cookie("token", token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 24 * 60 * 60 * 1000, // 1 day;
-    })
+    res.cookie("token", token, getCookieOptions(req, 24 * 60 * 60 * 1000));
 
     //  Return admin info (without password) and token
     const { password: _, ...adminData } = admin;
@@ -54,12 +66,7 @@ export const getMe = async (req, res) => {
 
 // logout admin
 export const logoutAdmin = async (req, res) => {
-    res.cookie("token", "", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 0,
-    });
+  res.cookie("token", "", getCookieOptions(req, 0));
     res.json({ message: "Logged out successfully" });
 }
 

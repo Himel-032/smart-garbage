@@ -1,6 +1,6 @@
 
 import { createContext,useContext, useState, useEffect } from 'react';
-import { login, logout, getMe } from '../api/auth.js';
+import { login, logout, getMe, updateProfile } from '../api/auth.js';
 
 const AuthContext = createContext();
 
@@ -31,8 +31,13 @@ export const AuthProvider = ({ children }) => {
         await logout();
         setAdmin(null);
     };
+    const updateAdminProfile = async (profileData) => {
+        const { data } = await updateProfile(profileData);
+        setAdmin(data.admin);
+        return data.admin;
+    };
     return (
-        <AuthContext.Provider value={{ admin, loading, loginAdmin, logoutAdmin }}>
+        <AuthContext.Provider value={{ admin, loading, loginAdmin, logoutAdmin, updateAdminProfile }}>
             {children}
         </AuthContext.Provider>
     );

@@ -17,3 +17,6 @@ export const logout = () => {
 export const getMe = () => {
     return api.get('me');
 }
+export const updateProfile = (profileData) => {
+    return api.put('profile', profileData);
+}

@@ -21,7 +21,10 @@ export const protectRoute = async (req, res, next) => {
             return res.status(401).json({ message: "Unauthorized: Invalid token" });
         }
         // get admin from db
-        const result = await pool.query("SELECT id, name, email FROM admins WHERE id = $1", [decoded.id]);
+        const result = await pool.query(
+            "SELECT id, name, email, phone, photo_url, created_at, updated_at FROM admins WHERE id = $1",
+            [decoded.id]
+        );
         if( result.rows.length === 0 ){
             return res.status(401).json({ message: "Unauthorized: Admin not found" });
         }

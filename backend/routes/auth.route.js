@@ -1,6 +1,7 @@
 import express from "express";
-import { loginAdmin, getMe, logoutAdmin, forgotPassword, resetPassword, validateResetToken } from "../controllers/auth.controller.js";
+import { loginAdmin, getMe, logoutAdmin, forgotPassword, resetPassword, validateResetToken, updateAdminProfile } from "../controllers/auth.controller.js";
 import { protectRoute } from "../middleware/protectRoute.js";
+import upload from "../config/multer.js";
 
 const router = express.Router();
 
@@ -10,6 +11,9 @@ router.post("/login", loginAdmin);
 router.post("/logout", protectRoute, logoutAdmin);
 // GET /api/auth/me
 router.get("/me", protectRoute, getMe);
+
+// PUT /api/auth/profile
+router.put("/profile", upload.single("photo"), protectRoute, updateAdminProfile);
 
 router.post("/forgot-password", forgotPassword);
 router.post("/reset-password/:token", resetPassword);

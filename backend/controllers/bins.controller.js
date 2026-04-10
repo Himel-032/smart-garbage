@@ -189,7 +189,10 @@ export const updateBin = async (req, res) => {
    const MAX_DISTANCE = 14;
 
    const weight = Math.max(0, Math.min(Number(weight_gm), MAX_WEIGHT));
-   const distance = Math.max(0, Math.min(Number(distance_cm), MAX_DISTANCE));
+   let distance = Math.max(0, Math.min(Number(distance_cm), MAX_DISTANCE));
+   if (distance_cm >= MAX_DISTANCE) {
+     distance = 0.5;
+   }
 
   
    // 1. Normalize inputs (0–100)

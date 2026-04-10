@@ -184,7 +184,56 @@ export const updateBin = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+ const calculateFillLevel = (weight_gm, distance_cm) => {
+   const MAX_WEIGHT = 1000;
+   const MAX_DISTANCE = 14;
 
+   const weight = Math.max(0, Math.min(Number(weight_gm), MAX_WEIGHT));
+   let distance = Math.max(0, Math.min(Number(distance_cm), MAX_DISTANCE));
+   if (distance_cm >= MAX_DISTANCE) {
+     distance = 0.5;
+   }
+
+  
+   // 1. Normalize inputs (0–100)
+   const weightFill = (weight / MAX_WEIGHT) * 100;
+
+   // smaller distance = more full
+   const distanceFill = ((MAX_DISTANCE - distance) / MAX_DISTANCE) * 100;
+
+   
+   // 2. Adaptive weighting
+  
+
+   const distanceRatio = distance / MAX_DISTANCE; // 0 (full) → 1 (empty)
+
+   const weightFactor = 0.35; // fixed support status
+   const distanceFactor = 1 - weightFactor;
+
+   
+   // 3. Final fill level
+  
+   const fillLevel = Math.round(
+     weightFactor * weightFill + distanceFactor * distanceFill,
+   );
+
+  
+  
+   
+   let fillStatus = "Empty";
+
+   if (fillLevel >= 85) fillStatus = "Full";
+   else if (fillLevel >= 60) fillStatus = "High";
+   else if (fillLevel >= 35) fillStatus = "Medium";
+   else if (fillLevel >= 10) fillStatus = "Low";
+
+   return {
+     fillLevel,
+     fillStatus,
+     weightFill: Math.round(weightFill),
+     distanceFill: Math.round(distanceFill),
+   };
+ };
 export const receiveBinData = async (req, res) => {
   const auth = req.headers.authorization;
 
@@ -194,9 +243,26 @@ export const receiveBinData = async (req, res) => {
 
   const { device_name, weight_gm, distance_cm } = req.body;
 
-  console.log(device_name, weight_gm, distance_cm);
+  const { fillLevel, fillStatus, weightFill, distanceFill } = calculateFillLevel(
+    weight_gm,
+    distance_cm,
+  );
+  const result = await pool.query(`SELECT current_level FROM bins WHERE name = $1`, [device_name]);
+  if (result.rows.length === 0) {
+    return res.status(404).json({ message: "Bin not found" });
+  }
+  if (Math.abs(result.rows[0].current_level - fillLevel) > 5 && weightFill > 5) {
+    console.log(device_name, weight_gm, distance_cm);
+    await pool.query(
+      `UPDATE bins SET current_level = $1, updated_at = NOW() WHERE name = $2`,
+      [fillLevel, device_name],
+    );
+    res.json({ status: "send to database" });
+  } else {
+    res.json({ status: "no significant change" });
+  }
 
-  res.json({ status: "received" });
+  
 };
 
 export const getAssignedBins = async (req, res) => {

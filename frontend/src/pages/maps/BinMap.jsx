@@ -347,7 +347,7 @@ const BinMap = () => {
                     >
                       {/* {Math.round(((bin.current_level || 0) / (bin.capacity || 100)) * 100)}% */}
                       {Math.round(
-                        ((bin.current_level || 0))
+                        ((bin.current_level || 0) / (bin.capacity || 100)) * 100
                       )}
                       %
                     </span>

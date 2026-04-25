@@ -83,7 +83,7 @@ const AnalyticsPage = () => {
         capacity: Number(bin.capacity) || 100,
         fillPercentage:
           bin.capacity > 0
-            ? Number((bin.current_level ).toFixed(2))
+            ? Math.round((bin.current_level / bin.capacity) * 100)
             : 0,
       }));
       

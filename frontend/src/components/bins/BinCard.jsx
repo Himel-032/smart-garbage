@@ -17,7 +17,8 @@ const BinCard = ({ bin, onDelete, onEdit }) => {
 
   // Calculate fill percentage
   // const fillPercentage = Math.round((bin.current_level / bin.capacity) * 100);
-  const fillPercentage = bin.current_level;
+  // const fillPercentage = bin.current_level;
+  const fillPercentage = Math.round((bin.current_level / bin.capacity) * 100);
   const hasPhoto = Boolean(bin.last_collected_photo) && !imageLoadFailed;
 
   // Determine status based on fill level

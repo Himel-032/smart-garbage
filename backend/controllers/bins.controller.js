@@ -267,8 +267,8 @@ export const updateBin = async (req, res) => {
 // };
 
 
-// Line 187 — replace from here
-const MAX_DISTANCE = 14; // cm — distance when bin is completely empty. Adjust to your hardware.
+
+const MAX_DISTANCE = 14; // cm — distance when bin is completely empty. 
 
 const calculateVolumeFromDistance = (distance_cm, capacity_liters) => {
   const distance = Math.max(0.5, Math.min(Number(distance_cm), MAX_DISTANCE));
@@ -285,7 +285,7 @@ export const receiveBinData = async (req, res) => {
 
   const { device_name, weight_gm, distance_cm } = req.body;
 
-  // Fetch current_level AND capacity — need capacity to compute volume in litres
+  // Fetch current_level AND capacity 
   const result = await pool.query(
     `SELECT current_level, capacity FROM bins WHERE name = $1`,
     [device_name]

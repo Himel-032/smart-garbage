@@ -17,6 +17,9 @@ export const createDriver = (driverData) => {
 export const getDriverById = (id) => {
   return api.get(`/${id}`);
 };
+export const getDriverPerformance = (id) => {
+  return api.get(`/${id}/performance`);
+};
 export const updateDriver = (id, driverData) => {
   return api.put(`/${id}`, driverData);
 };

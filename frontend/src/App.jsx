@@ -14,6 +14,7 @@ import DriversPage from './pages/drivers/DriversPage.jsx';
 import AddDriver from './pages/drivers/AddDriver.jsx';
 import EditDriver from './pages/drivers/EditDriver.jsx';
 import DriverDetailPage from './pages/drivers/DriverDetailPage.jsx';
+import DriverPerformancePage from './pages/drivers/DriverPerformancePage.jsx';
 import DriverResetPassword from './pages/drivers/DriverResetPassword.jsx';
 import MessagesPage from './pages/messages/MessagesPage.jsx';
 import ConversationPage from './pages/messages/ConversationPage.jsx';
@@ -72,6 +73,15 @@ function App() {
             <ProtectRoute>
               {" "}
               <DriverDetailPage />
+            </ProtectRoute>
+          }
+        />
+        <Route
+          path="/drivers/:id/performance"
+          element={
+            <ProtectRoute>
+              {" "}
+              <DriverPerformancePage />
             </ProtectRoute>
           }
         />

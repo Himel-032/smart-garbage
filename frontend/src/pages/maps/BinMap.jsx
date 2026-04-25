@@ -64,6 +64,8 @@ const BinMap = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedBin, setSelectedBin] = useState(null);
+  const [minFillFilter, setMinFillFilter] = useState(0);
+  const [showOnlyFull, setShowOnlyFull] = useState(false);
 
   // Default center (Khulna, Bangladesh)
   const defaultCenter = [22.89792, 89.5021];
@@ -119,6 +121,14 @@ const BinMap = () => {
       !isNaN(parseFloat(bin.longitude))
   );
 
+  const effectiveMinFill = showOnlyFull ? 80 : minFillFilter;
+
+  const filteredBins = validBins.filter((bin) => {
+    const fillPercentage =
+      ((bin.current_level || 0) / (bin.capacity || 100)) * 100;
+    return fillPercentage >= effectiveMinFill;
+  });
+
   // Loading state
   if (loading) {
     return (
@@ -159,204 +169,344 @@ const BinMap = () => {
     );
   }
 
-  return (
-    <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-      {/* Map Section */}
-      <div className="xl:col-span-3">
-        <div className="h-[550px] rounded-2xl overflow-hidden shadow-lg border border-gray-200">
-          <MapContainer
-            center={defaultCenter}
-            zoom={13}
-            style={{ height: "100%", width: "100%" }}
-            scrollWheelZoom={true}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <FitBounds bins={validBins} />
-
-            {validBins.map((bin) => (
-              <Marker
-                key={bin.id}
-                position={[parseFloat(bin.latitude), parseFloat(bin.longitude)]}
-                icon={getMarkerIcon(bin)}
-                eventHandlers={{
-                  click: () => setSelectedBin(bin),
+  if (filteredBins.length === 0) {
+    return (
+      <div>
+        <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 flex flex-col gap-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
+              <span className="text-sm font-medium text-gray-700">Show bins above:</span>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={5}
+                value={minFillFilter}
+                onChange={(e) => {
+                  const value = Number(e.target.value);
+                  setMinFillFilter(value);
+                  setShowOnlyFull(value >= 80);
                 }}
+                className="w-48 accent-emerald-600"
+              />
+              <span className="text-sm font-semibold text-emerald-700 min-w-20">
+                {effectiveMinFill}% full
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={() => {
+                  setMinFillFilter(0);
+                  setShowOnlyFull(false);
+                }}
+                className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
               >
-                <Popup>
-                  <div className="min-w-[200px]">
-                    <h3 className="font-bold text-gray-800 text-lg mb-2">
-                      {bin.name}
-                    </h3>
-                    <div className="space-y-1 text-sm">
-                      <p className="text-gray-600">
-                        📍 {bin.location || "No location"}
-                      </p>
-                      <p className="text-gray-600">
-                        📊 {bin.current_level || 0} / {bin.capacity} L
-                      </p>
-                      <p
-                        className={`font-medium ${getStatusLabel(bin).textColor}`}
-                      >
-                        Status: {getStatusLabel(bin).text}
-                      </p>
-                      {bin.driver_name && (
-                        <p className="text-gray-600">👤 {bin.driver_name}</p>
-                      )}
-                    </div>
-                    <a
-                      href={`https://www.google.com/maps/dir/?api=1&destination=${bin.latitude},${bin.longitude}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 text-sm font-medium"
-                    >
-                      <Navigation size={14} /> Get Directions
-                    </a>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
+                All
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMinFillFilter(60);
+                  setShowOnlyFull(false);
+                }}
+                className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
+              >
+                60%+
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setMinFillFilter(80);
+                  setShowOnlyFull(true);
+                }}
+                className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
+              >
+                80%+
+              </button>
+            </div>
+          </div>
+
+          <div className="text-sm text-gray-600">
+            Showing {filteredBins.length} of {validBins.length} bins
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center h-80 bg-gray-50 rounded-xl border border-gray-200">
+          <div className="text-center">
+            <MapPin className="w-10 h-10 text-gray-400 mx-auto mb-3" />
+            <p className="text-gray-600 font-medium">No bins match this filter</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Try lowering the minimum fill percentage
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="bg-white border border-gray-200 rounded-xl p-4 mb-6 flex flex-col gap-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-sm font-medium text-gray-700">Show bins above:</span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={minFillFilter}
+              onChange={(e) => {
+                const value = Number(e.target.value);
+                setMinFillFilter(value);
+                setShowOnlyFull(value >= 80);
+              }}
+              className="w-48 accent-emerald-600"
+            />
+            <span className="text-sm font-semibold text-emerald-700 min-w-20">
+              {effectiveMinFill}% full
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => {
+                setMinFillFilter(0);
+                setShowOnlyFull(false);
+              }}
+              className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
+            >
+              All
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMinFillFilter(60);
+                setShowOnlyFull(false);
+              }}
+              className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
+            >
+              60%+
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMinFillFilter(80);
+                setShowOnlyFull(true);
+              }}
+              className="px-3 py-1.5 text-sm rounded-lg border border-gray-300 bg-white hover:bg-gray-50"
+            >
+              80%+
+            </button>
+          </div>
+        </div>
+
+        <div className="text-sm text-gray-600">
+          Showing {filteredBins.length} of {validBins.length} bins
         </div>
       </div>
 
-      {/* Sidebar - Bin Details or List */}
-      <div className="xl:col-span-1">
-        {selectedBin ? (
-          /* Selected Bin Details */
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-            <div className={`p-4 ${getColorClass(selectedBin)} text-white`}>
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-lg">{selectedBin.name}</h3>
-                <button
-                  onClick={() => setSelectedBin(null)}
-                  className="text-white/80 hover:text-white"
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        {/* Map Section */}
+        <div className="xl:col-span-3">
+          <div className="h-[550px] rounded-2xl overflow-hidden shadow-lg border border-gray-200">
+            <MapContainer
+              center={defaultCenter}
+              zoom={13}
+              style={{ height: "100%", width: "100%" }}
+              scrollWheelZoom={true}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <FitBounds bins={validBins} />
+
+              {filteredBins.map((bin) => (
+                <Marker
+                  key={bin.id}
+                  position={[parseFloat(bin.latitude), parseFloat(bin.longitude)]}
+                  icon={getMarkerIcon(bin)}
+                  eventHandlers={{
+                    click: () => setSelectedBin(bin),
+                  }}
                 >
-                  ✕
-                </button>
-              </div>
-              <p className="text-sm opacity-90">
-                {getStatusLabel(selectedBin).text}
-              </p>
-            </div>
+                  <Popup>
+                    <div className="min-w-[200px]">
+                      <h3 className="font-bold text-gray-800 text-lg mb-2">
+                        {bin.name}
+                      </h3>
+                      <div className="space-y-1 text-sm">
+                        <p className="text-gray-600">
+                          📍 {bin.location || "No location"}
+                        </p>
+                        <p className="text-gray-600">
+                          📊 {bin.current_level || 0} / {bin.capacity} L
+                        </p>
+                        <p
+                          className={`font-medium ${getStatusLabel(bin).textColor}`}
+                        >
+                          Status: {getStatusLabel(bin).text}
+                        </p>
+                        {bin.driver_name && (
+                          <p className="text-gray-600">👤 {bin.driver_name}</p>
+                        )}
+                      </div>
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${bin.latitude},${bin.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-3 inline-flex items-center gap-1 text-emerald-600 hover:text-emerald-700 text-sm font-medium"
+                      >
+                        <Navigation size={14} /> Get Directions
+                      </a>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
+          </div>
+        </div>
 
-            <div className="p-4 space-y-4">
-              <div className="flex items-center gap-3 text-gray-600">
-                <MapPin className="w-5 h-5 text-gray-400 shrink-0" />
-                <span className="text-sm">
-                  {selectedBin.location || "No location"}
-                </span>
-              </div>
-
-              <div className="flex items-center gap-3 text-gray-600">
-                <Gauge className="w-5 h-5 text-gray-400 shrink-0" />
-                <span className="text-sm">
-                  {selectedBin.current_level || 0} / {selectedBin.capacity} L
-                </span>
-              </div>
-
-              {selectedBin.driver_name && (
-                <div className="flex items-center gap-3 text-gray-600">
-                  <User className="w-5 h-5 text-gray-400 shrink-0" />
-                  <span className="text-sm">{selectedBin.driver_name}</span>
+        {/* Sidebar - Bin Details or List */}
+        <div className="xl:col-span-1">
+          {selectedBin ? (
+            /* Selected Bin Details */
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className={`p-4 ${getColorClass(selectedBin)} text-white`}>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-lg">{selectedBin.name}</h3>
+                  <button
+                    onClick={() => setSelectedBin(null)}
+                    className="text-white/80 hover:text-white"
+                  >
+                    ✕
+                  </button>
                 </div>
-              )}
-
-              {/* Fill Level Bar */}
-              <div>
-                <div className="flex justify-between text-xs text-gray-500 mb-1">
-                  <span>Fill Level</span>
-                  <span>
-                    {Math.round(
-                      ((selectedBin.current_level || 0) /
-                        (selectedBin.capacity || 100)) *
-                        100,
-                    )}
-                    %
-                  </span>
-                </div>
-                <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full ${getColorClass(selectedBin)}`}
-                    style={{
-                      width: `${Math.min(
-                        ((selectedBin.current_level || 0) /
-                          (selectedBin.capacity || 100)) *
-                          100,
-                        100,
-                      )}%`,
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Coordinates */}
-              <div className="p-3 bg-gray-50 rounded-lg">
-                <p className="text-xs text-gray-500 mb-1">Coordinates</p>
-                <p className="text-sm font-mono text-gray-700">
-                  {selectedBin.latitude}, {selectedBin.longitude}
+                <p className="text-sm opacity-90">
+                  {getStatusLabel(selectedBin).text}
                 </p>
               </div>
 
-              {/* Directions Button */}
-              <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${selectedBin.latitude},${selectedBin.longitude}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition font-medium"
-              >
-                <ExternalLink size={18} />
-                Get Directions
-              </a>
-            </div>
-          </div>
-        ) : (
-          /* Bins List */
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-            <div className="p-4 bg-gray-50 border-b border-gray-200">
-              <h3 className="font-semibold text-gray-800">
-                All Bins ({validBins.length})
-              </h3>
-              <p className="text-xs text-gray-500 mt-1">
-                Click a marker or bin to view details
-              </p>
-            </div>
-            <div className="max-h-[460px] overflow-y-auto">
-              {validBins.map((bin) => (
-                <div
-                  key={bin.id}
-                  onClick={() => setSelectedBin(bin)}
-                  className="p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-3 h-3 rounded-full ${getColorClass(bin)}`}
-                    ></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-800 text-sm truncate">
-                        {bin.name}
-                      </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {bin.location || "No location"}
-                      </p>
-                    </div>
-                    <span
-                      className={`text-xs px-2 py-1 rounded-full text-white ${getColorClass(bin)}`}
-                    >
-                      {/* {Math.round(((bin.current_level || 0) / (bin.capacity || 100)) * 100)}% */}
+              <div className="p-4 space-y-4">
+                <div className="flex items-center gap-3 text-gray-600">
+                  <MapPin className="w-5 h-5 text-gray-400 shrink-0" />
+                  <span className="text-sm">
+                    {selectedBin.location || "No location"}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3 text-gray-600">
+                  <Gauge className="w-5 h-5 text-gray-400 shrink-0" />
+                  <span className="text-sm">
+                    {selectedBin.current_level || 0} / {selectedBin.capacity} L
+                  </span>
+                </div>
+
+                {selectedBin.driver_name && (
+                  <div className="flex items-center gap-3 text-gray-600">
+                    <User className="w-5 h-5 text-gray-400 shrink-0" />
+                    <span className="text-sm">{selectedBin.driver_name}</span>
+                  </div>
+                )}
+
+                {/* Fill Level Bar */}
+                <div>
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Fill Level</span>
+                    <span>
                       {Math.round(
-                        ((bin.current_level || 0) / (bin.capacity || 100)) * 100
+                        ((selectedBin.current_level || 0) /
+                          (selectedBin.capacity || 100)) *
+                          100,
                       )}
                       %
                     </span>
                   </div>
+                  <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${getColorClass(selectedBin)}`}
+                      style={{
+                        width: `${Math.min(
+                          ((selectedBin.current_level || 0) /
+                            (selectedBin.capacity || 100)) *
+                            100,
+                          100,
+                        )}%`,
+                      }}
+                    />
+                  </div>
                 </div>
-              ))}
+
+                {/* Coordinates */}
+                <div className="p-3 bg-gray-50 rounded-lg">
+                  <p className="text-xs text-gray-500 mb-1">Coordinates</p>
+                  <p className="text-sm font-mono text-gray-700">
+                    {selectedBin.latitude}, {selectedBin.longitude}
+                  </p>
+                </div>
+
+                {/* Directions Button */}
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${selectedBin.latitude},${selectedBin.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-3 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition font-medium"
+                >
+                  <ExternalLink size={18} />
+                  Get Directions
+                </a>
+              </div>
             </div>
-          </div>
-        )}
+          ) : (
+            /* Bins List */
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+              <div className="p-4 bg-gray-50 border-b border-gray-200">
+                <h3 className="font-semibold text-gray-800">
+                  All Bins ({filteredBins.length})
+                </h3>
+                <p className="text-xs text-gray-500 mt-1">
+                  Click a marker or bin to view details
+                </p>
+              </div>
+              <div className="max-h-[460px] overflow-y-auto">
+                {filteredBins.map((bin) => (
+                  <div
+                    key={bin.id}
+                    onClick={() => setSelectedBin(bin)}
+                    className="p-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-3 h-3 rounded-full ${getColorClass(bin)}`}
+                      ></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-800 text-sm truncate">
+                          {bin.name}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {bin.location || "No location"}
+                        </p>
+                      </div>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full text-white ${getColorClass(bin)}`}
+                      >
+                        {/* {Math.round(((bin.current_level || 0) / (bin.capacity || 100)) * 100)}% */}
+                        {Math.round(
+                          ((bin.current_level || 0) / (bin.capacity || 100)) * 100
+                        )}
+                        %
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

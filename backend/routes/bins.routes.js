@@ -8,15 +8,23 @@ import {
   getAllUnassignedBins,
   receiveBinData,
   getAssignedBins,
+  markBinCollected,
 } from "../controllers/bins.controller.js";
 import { protectRoute } from "../middleware/protectRoute.js";
 import { authenticateDriver } from "../middleware/driverAuth.js";
+
+import upload from "../config/multer.js";
 
 
 const router = express.Router();
 
 router.get("/assigned", authenticateDriver, getAssignedBins); // Get bins assigned to authenticated driver
-
+router.put(
+  "/:id/collect",
+  authenticateDriver,
+  upload.single("photo"),
+  markBinCollected,
+);
 router.post("/add", protectRoute, addBin); // Add bin
 router.get("/", protectRoute, getAllBins); // Get all bins
 router.get("/unassigned", protectRoute, getAllUnassignedBins); // Get all unassigned bins

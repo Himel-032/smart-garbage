@@ -1,0 +1,128 @@
+[
+  {
+    "name": "Bins: admin login",
+    "input": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "body": {
+        "email": "{{ADMIN_EMAIL}}",
+        "password": "{{ADMIN_PASSWORD}}"
+      }
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathExists": ["token"],
+      "jsonPathTypes": {
+        "token": "string"
+      }
+    },
+    "capture": {
+      "adminToken": "token"
+    }
+  },
+  {
+    "name": "Bins: driver login",
+    "input": {
+      "method": "POST",
+      "path": "/api/drivers/login",
+      "body": {
+        "email": "{{DRIVER_EMAIL}}",
+        "password": "{{DRIVER_PASSWORD}}"
+      }
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "message": "Login successful"
+      },
+      "jsonPathExists": ["token"],
+      "jsonPathTypes": {
+        "token": "string"
+      }
+    },
+    "capture": {
+      "driverToken": "token"
+    }
+  },
+  {
+    "name": "Bins: get all bins (admin)",
+    "input": {
+      "method": "GET",
+      "path": "/api/bins",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathTypes": {
+        "length": "number"
+      }
+    }
+  },
+  {
+    "name": "Bins: get unassigned bins (admin)",
+    "input": {
+      "method": "GET",
+      "path": "/api/bins/unassigned",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathTypes": {
+        "length": "number"
+      }
+    }
+  },
+  {
+    "name": "Bins: get one bin by id (admin)",
+    "input": {
+      "method": "GET",
+      "path": "/api/bins/{{TEST_BIN_ID}}",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "oneOfStatus": [200, 404]
+    }
+  },
+  {
+    "name": "Bins: get assigned bins (driver)",
+    "input": {
+      "method": "GET",
+      "path": "/api/bins/assigned",
+      "auth": "driver"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathTypes": {
+        "length": "number"
+      }
+    }
+  },
+  {
+    "name": "Bins: driver logout",
+    "input": {
+      "method": "POST",
+      "path": "/api/drivers/logout",
+      "auth": "driver"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "message": "Driver logged out successfully. Please delete the token on the client."
+      }
+    }
+  },
+  {
+    "name": "Bins: admin logout",
+    "input": {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "message": "Logged out successfully"
+      }
+    }
+  }
+]

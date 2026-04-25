@@ -1,0 +1,128 @@
+[
+  {
+    "name": "Drivers: driver login",
+    "input": {
+      "method": "POST",
+      "path": "/api/drivers/login",
+      "body": {
+        "email": "{{DRIVER_EMAIL}}",
+        "password": "{{DRIVER_PASSWORD}}"
+      }
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "message": "Login successful"
+      },
+      "jsonPathExists": ["token"],
+      "jsonPathTypes": {
+        "token": "string"
+      }
+    },
+    "capture": {
+      "driverToken": "token"
+    }
+  },
+  {
+    "name": "Drivers: get driver home profile",
+    "input": {
+      "method": "GET",
+      "path": "/api/drivers/home",
+      "auth": "driver"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "message": "Welcome Driver"
+      },
+      "jsonPathExists": ["driver.id", "driver.email"]
+    },
+    "capture": {
+      "driverId": "driver.id"
+    }
+  },
+  {
+    "name": "Drivers: validate reset token with fake value",
+    "input": {
+      "method": "GET",
+      "path": "/api/drivers/validate-reset-token/fake-token-for-read-only"
+    },
+    "expectedOutput": {
+      "status": 400,
+      "jsonIncludes": {
+        "message": "Invalid or expired token"
+      }
+    }
+  },
+  {
+    "name": "Drivers: admin login for protected admin GET routes",
+    "input": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "body": {
+        "email": "{{ADMIN_EMAIL}}",
+        "password": "{{ADMIN_PASSWORD}}"
+      }
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathExists": ["token"]
+    },
+    "capture": {
+      "adminToken": "token"
+    }
+  },
+  {
+    "name": "Drivers: get all drivers (admin)",
+    "input": {
+      "method": "GET",
+      "path": "/api/drivers",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathTypes": {
+        "length": "number"
+      }
+    }
+  },
+  {
+    "name": "Drivers: get one driver by id (admin)",
+    "input": {
+      "method": "GET",
+      "path": "/api/drivers/{{TEST_DRIVER_ID}}",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "oneOfStatus": [200, 404]
+    }
+  },
+  {
+    "name": "Drivers: driver logout",
+    "input": {
+      "method": "POST",
+      "path": "/api/drivers/logout",
+      "auth": "driver"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "message": "Driver logged out successfully. Please delete the token on the client."
+      }
+    }
+  },
+  {
+    "name": "Drivers: admin logout",
+    "input": {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "message": "Logged out successfully"
+      }
+    }
+  }
+]

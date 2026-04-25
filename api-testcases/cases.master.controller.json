@@ -1,0 +1,24 @@
+// Master list of controller suites (for reference)
+// Run all suites using: node api-testcases/run-master-controller.mjs api-testcases/env.sample.json api-testcases/credentials.sample.json
+[
+  {
+    "suite": "cases.auth.controller.json",
+    "run": "node api-testcases/run-api-tests.mjs api-testcases/env.sample.json api-testcases/cases.auth.controller.json api-testcases/credentials.sample.json"
+  },
+  {
+    "suite": "cases.bins.controller.json",
+    "run": "node api-testcases/run-api-tests.mjs api-testcases/env.sample.json api-testcases/cases.bins.controller.json api-testcases/credentials.sample.json"
+  },
+  {
+    "suite": "cases.drivers.controller.json",
+    "run": "node api-testcases/run-api-tests.mjs api-testcases/env.sample.json api-testcases/cases.drivers.controller.json api-testcases/credentials.sample.json"
+  },
+  {
+    "suite": "cases.messages.controller.json",
+    "run": "node api-testcases/run-api-tests.mjs api-testcases/env.sample.json api-testcases/cases.messages.controller.json api-testcases/credentials.sample.json"
+  },
+  {
+    "suite": "cases.analytics.controller.json",
+    "run": "node api-testcases/run-api-tests.mjs api-testcases/env.sample.json api-testcases/cases.analytics.controller.json api-testcases/credentials.sample.json"
+  }
+]

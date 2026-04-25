@@ -1,0 +1,102 @@
+[
+  {
+    "name": "Analytics: admin login",
+    "input": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "body": {
+        "email": "{{ADMIN_EMAIL}}",
+        "password": "{{ADMIN_PASSWORD}}"
+      }
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathExists": ["token"],
+      "jsonPathTypes": {
+        "token": "string"
+      }
+    },
+    "capture": {
+      "adminToken": "token"
+    }
+  },
+  {
+    "name": "Analytics: get one bin analytics daily",
+    "input": {
+      "method": "GET",
+      "path": "/api/analytics/bin/{{TEST_BIN_ID}}?range=daily",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "range": "daily"
+      },
+      "jsonPathTypes": {
+        "data": "array"
+      }
+    }
+  },
+  {
+    "name": "Analytics: get one bin analytics weekly",
+    "input": {
+      "method": "GET",
+      "path": "/api/analytics/bin/{{TEST_BIN_ID}}?range=weekly",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "range": "weekly"
+      },
+      "jsonPathTypes": {
+        "data": "array"
+      }
+    }
+  },
+  {
+    "name": "Analytics: get all bins analytics monthly",
+    "input": {
+      "method": "GET",
+      "path": "/api/analytics/bins?range=monthly",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "range": "monthly"
+      },
+      "jsonPathTypes": {
+        "data": "array"
+      }
+    }
+  },
+  {
+    "name": "Analytics: get top bins",
+    "input": {
+      "method": "GET",
+      "path": "/api/analytics/top?top={{ANALYTICS_TOP}}",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathTypes": {
+        "data": "array"
+      }
+    }
+  },
+  {
+    "name": "Analytics: admin logout",
+    "input": {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "message": "Logged out successfully"
+      }
+    }
+  }
+]

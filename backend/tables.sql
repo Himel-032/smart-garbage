@@ -63,6 +63,8 @@ CREATE TABLE bins (
 ALTER TABLE bins
 ALTER COLUMN status SET DEFAULT 'working';
 
+ALTER TABLE bins
+ADD COLUMN last_collected_photo TEXT DEFAULT NULL;
 
 -- 4️⃣ Bin Readings Table (for historical/monthly data & trends)
 CREATE TABLE bin_readings (

@@ -1,0 +1,247 @@
+[
+  {
+    "name": "GET / should return service status text",
+    "input": {
+      "method": "GET",
+      "path": "/"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "bodyIncludes": "Smart Garbage Management System Backend is running"
+    }
+  },
+  {
+    "name": "GET /api/auth/me without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  },
+  {
+    "name": "GET /api/auth/validate-reset-token/:token with fake token",
+    "input": {
+      "method": "GET",
+      "path": "/api/auth/validate-reset-token/fake-token-for-read-only-test"
+    },
+    "expectedOutput": {
+      "status": 400,
+      "jsonIncludes": {
+        "message": "Invalid or expired token"
+      }
+    }
+  },
+  {
+    "name": "GET /api/bins/assigned without driver bearer token",
+    "input": {
+      "method": "GET",
+      "path": "/api/bins/assigned"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Authorization header missing or malformed"
+      }
+    }
+  },
+  {
+    "name": "GET /api/bins without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/bins"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  },
+  {
+    "name": "GET /api/bins/unassigned without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/bins/unassigned"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  },
+  {
+    "name": "GET /api/bins/:id without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/bins/1"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  },
+  {
+    "name": "GET /api/drivers/home without driver bearer token",
+    "input": {
+      "method": "GET",
+      "path": "/api/drivers/home"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Authorization header missing or malformed"
+      }
+    }
+  },
+  {
+    "name": "GET /api/drivers/validate-reset-token/:token with fake token",
+    "input": {
+      "method": "GET",
+      "path": "/api/drivers/validate-reset-token/fake-token-for-read-only-test"
+    },
+    "expectedOutput": {
+      "status": 400,
+      "jsonIncludes": {
+        "message": "Invalid or expired token"
+      }
+    }
+  },
+  {
+    "name": "GET /api/drivers without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/drivers"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  },
+  {
+    "name": "GET /api/drivers/:id without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/drivers/1"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  },
+  {
+    "name": "GET /api/messages/search-drivers without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/messages/search-drivers?search=rahim"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  },
+  {
+    "name": "GET /api/messages/conversations without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/messages/conversations"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  },
+  {
+    "name": "GET /api/messages/driver-conversations without driver token",
+    "input": {
+      "method": "GET",
+      "path": "/api/messages/driver-conversations"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Authorization header missing or malformed"
+      }
+    }
+  },
+  {
+    "name": "GET /api/messages/admin without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/messages/admin?user_role=admin&user_id=1&other_role=driver&other_id=1"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  },
+  {
+    "name": "GET /api/messages/driver without driver token",
+    "input": {
+      "method": "GET",
+      "path": "/api/messages/driver?user_role=driver&user_id=1&other_role=admin&other_id=1"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Authorization header missing or malformed"
+      }
+    }
+  },
+  {
+    "name": "GET /api/analytics/bin/:binId without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/analytics/bin/1?range=daily"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  },
+  {
+    "name": "GET /api/analytics/bins without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/analytics/bins?range=weekly"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  },
+  {
+    "name": "GET /api/analytics/top without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/analytics/top?top=5"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  }
+]

@@ -1,5 +1,7 @@
 import pool from "../db.js";
 import dotenv from "dotenv";
+
+import { uploadToCloudinary } from "../config/cloudinaryUpload.js";
 dotenv.config();
 
 export const addBin = async (req, res) => {
@@ -184,56 +186,49 @@ export const updateBin = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
- const calculateFillLevel = (weight_gm, distance_cm) => {
-   const MAX_WEIGHT = 1000;
-   const MAX_DISTANCE = 14;
+const calculateFillLevel = (weight_gm, distance_cm) => {
+  const MAX_WEIGHT = 1000;
+  const MAX_DISTANCE = 14;
 
-   const weight = Math.max(0, Math.min(Number(weight_gm), MAX_WEIGHT));
-   let distance = Math.max(0, Math.min(Number(distance_cm), MAX_DISTANCE));
-   if (distance_cm >= MAX_DISTANCE) {
-     distance = 0.5;
-   }
+  const weight = Math.max(0, Math.min(Number(weight_gm), MAX_WEIGHT));
+  let distance = Math.max(0, Math.min(Number(distance_cm), MAX_DISTANCE));
+  if (distance_cm >= MAX_DISTANCE) {
+    distance = 0.5;
+  }
 
-  
-   // 1. Normalize inputs (0–100)
-   const weightFill = (weight / MAX_WEIGHT) * 100;
+  // 1. Normalize inputs (0–100)
+  const weightFill = (weight / MAX_WEIGHT) * 100;
 
-   // smaller distance = more full
-   const distanceFill = ((MAX_DISTANCE - distance) / MAX_DISTANCE) * 100;
+  // smaller distance = more full
+  const distanceFill = ((MAX_DISTANCE - distance) / MAX_DISTANCE) * 100;
 
-   
-   // 2. Adaptive weighting
-  
+  // 2. Adaptive weighting
 
-   const distanceRatio = distance / MAX_DISTANCE; // 0 (full) → 1 (empty)
+  const distanceRatio = distance / MAX_DISTANCE; // 0 (full) → 1 (empty)
 
-   const weightFactor = 0.35; // fixed support status
-   const distanceFactor = 1 - weightFactor;
+  const weightFactor = 0.35; // fixed support status
+  const distanceFactor = 1 - weightFactor;
 
-   
-   // 3. Final fill level
-  
-   const fillLevel = Math.round(
-     weightFactor * weightFill + distanceFactor * distanceFill,
-   );
+  // 3. Final fill level
 
-  
-  
-   
-   let fillStatus = "Empty";
+  const fillLevel = Math.round(
+    weightFactor * weightFill + distanceFactor * distanceFill,
+  );
 
-   if (fillLevel >= 85) fillStatus = "Full";
-   else if (fillLevel >= 60) fillStatus = "High";
-   else if (fillLevel >= 35) fillStatus = "Medium";
-   else if (fillLevel >= 10) fillStatus = "Low";
+  let fillStatus = "Empty";
 
-   return {
-     fillLevel,
-     fillStatus,
-     weightFill: Math.round(weightFill),
-     distanceFill: Math.round(distanceFill),
-   };
- };
+  if (fillLevel >= 85) fillStatus = "Full";
+  else if (fillLevel >= 60) fillStatus = "High";
+  else if (fillLevel >= 35) fillStatus = "Medium";
+  else if (fillLevel >= 10) fillStatus = "Low";
+
+  return {
+    fillLevel,
+    fillStatus,
+    weightFill: Math.round(weightFill),
+    distanceFill: Math.round(distanceFill),
+  };
+};
 export const receiveBinData = async (req, res) => {
   const auth = req.headers.authorization;
 
@@ -243,15 +238,19 @@ export const receiveBinData = async (req, res) => {
 
   const { device_name, weight_gm, distance_cm } = req.body;
 
-  const { fillLevel, fillStatus, weightFill, distanceFill } = calculateFillLevel(
-    weight_gm,
-    distance_cm,
+  const { fillLevel, fillStatus, weightFill, distanceFill } =
+    calculateFillLevel(weight_gm, distance_cm);
+  const result = await pool.query(
+    `SELECT current_level FROM bins WHERE name = $1`,
+    [device_name],
   );
-  const result = await pool.query(`SELECT current_level FROM bins WHERE name = $1`, [device_name]);
   if (result.rows.length === 0) {
     return res.status(404).json({ message: "Bin not found" });
   }
-  if (Math.abs(result.rows[0].current_level - fillLevel) > 5 && weightFill > 5) {
+  if (
+    Math.abs(result.rows[0].current_level - fillLevel) > 5 &&
+    weightFill > 5
+  ) {
     console.log(device_name, weight_gm, distance_cm);
     await pool.query(
       `UPDATE bins SET current_level = $1, updated_at = NOW() WHERE name = $2`,
@@ -261,8 +260,6 @@ export const receiveBinData = async (req, res) => {
   } else {
     res.json({ status: "no significant change" });
   }
-
-  
 };
 
 export const getAssignedBins = async (req, res) => {
@@ -275,6 +272,61 @@ export const getAssignedBins = async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const markBinCollected = async (req, res) => {
+  try {
+    const driverId = req.driver.id; // comes from authenticateDriver middleware
+    const binId = parseInt(req.params.id);
+
+    if (isNaN(binId)) {
+      return res.status(400).json({ message: "Invalid bin ID" });
+    }
+
+    // Make sure this bin actually belongs to this driver
+    // A driver should not be able to mark someone else's bin
+    const check = await pool.query(
+      "SELECT * FROM bins WHERE id = $1 AND driver_id = $2",
+      [binId, driverId],
+    );
+
+    if (check.rows.length === 0) {
+      return res.status(403).json({
+        message: "Bin not found or not assigned to you",
+      });
+    }
+
+    // Upload the photo to Cloudinary if one was sent
+    let photoUrl = null;
+    if (req.file) {
+      const uploadResult = await uploadToCloudinary(
+        req.file.buffer,
+        "smart_garbage/collections", // saves in a separate folder from driver photos
+      );
+      photoUrl = uploadResult.secure_url;
+    }
+
+    // Reset the bin: level back to 0, status back to empty, save photo URL
+    const result = await pool.query(
+      `UPDATE bins
+       SET current_level = 0,
+           status = 'empty',
+           last_collected_photo = COALESCE($1, last_collected_photo),
+           updated_at = NOW()
+       WHERE id = $2
+       RETURNING *`,
+      [photoUrl, binId],
+    );
+
+    res.json({
+      success: true,
+      message: "Bin marked as collected successfully",
+      bin: result.rows[0],
+    });
+  } catch (err) {
+    console.error("markBinCollected error:", err);
     res.status(500).json({ message: "Server error" });
   }
 };

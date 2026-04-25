@@ -1,0 +1,63 @@
+[
+  {
+    "name": "Auth: admin login",
+    "input": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "body": {
+        "email": "{{ADMIN_EMAIL}}",
+        "password": "{{ADMIN_PASSWORD}}"
+      }
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathExists": ["token", "admin.id", "admin.email"],
+      "jsonPathTypes": {
+        "token": "string"
+      }
+    },
+    "capture": {
+      "adminToken": "token",
+      "adminId": "admin.id"
+    }
+  },
+  {
+    "name": "Auth: get current admin profile",
+    "input": {
+      "method": "GET",
+      "path": "/api/auth/me",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathExists": ["admin.id", "admin.email"]
+    }
+  },
+  {
+    "name": "Auth: validate reset token with fake value",
+    "input": {
+      "method": "GET",
+      "path": "/api/auth/validate-reset-token/fake-token-for-read-only"
+    },
+    "expectedOutput": {
+      "status": 400,
+      "jsonIncludes": {
+        "message": "Invalid or expired token"
+      }
+    }
+  },
+  {
+    "name": "Auth: admin logout",
+    "input": {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "message": "Logged out successfully"
+      }
+    }
+  }
+]

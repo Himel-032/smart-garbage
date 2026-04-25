@@ -1,0 +1,9 @@
+node api-testcases/run-api-tests.mjs api-testcases/env.json api-testcases/cases.auth.controller.json api-testcases/credentials.json
+node api-testcases/run-api-tests.mjs api-testcases/env.json api-testcases/cases.bins.controller.json api-testcases/credentials.json
+node api-testcases/run-api-tests.mjs api-testcases/env.json api-testcases/cases.drivers.controller.json api-testcases/credentials.json
+node api-testcases/run-api-tests.mjs api-testcases/env.json api-testcases/cases.messages.controller.json api-testcases/credentials.json
+node api-testcases/run-api-tests.mjs api-testcases/env.json api-testcases/cases.analytics.controller.json api-testcases/credentials.json
+
+
+testing all cases at once
+node api-testcases/run-master-controller.mjs api-testcases/env.json api-testcases/credentials.json

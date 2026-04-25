@@ -1,0 +1,161 @@
+[
+  {
+    "name": "Messages: admin login",
+    "input": {
+      "method": "POST",
+      "path": "/api/auth/login",
+      "body": {
+        "email": "{{ADMIN_EMAIL}}",
+        "password": "{{ADMIN_PASSWORD}}"
+      }
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathExists": ["token", "admin.id"],
+      "jsonPathTypes": {
+        "token": "string"
+      }
+    },
+    "capture": {
+      "adminToken": "token",
+      "adminId": "admin.id"
+    }
+  },
+  {
+    "name": "Messages: driver login",
+    "input": {
+      "method": "POST",
+      "path": "/api/drivers/login",
+      "body": {
+        "email": "{{DRIVER_EMAIL}}",
+        "password": "{{DRIVER_PASSWORD}}"
+      }
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "message": "Login successful"
+      },
+      "jsonPathExists": ["token"],
+      "jsonPathTypes": {
+        "token": "string"
+      }
+    },
+    "capture": {
+      "driverToken": "token"
+    }
+  },
+  {
+    "name": "Messages: fetch driver profile to capture driver id",
+    "input": {
+      "method": "GET",
+      "path": "/api/drivers/home",
+      "auth": "driver"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathExists": ["driver.id"]
+    },
+    "capture": {
+      "driverId": "driver.id"
+    }
+  },
+  {
+    "name": "Messages: admin search drivers",
+    "input": {
+      "method": "GET",
+      "path": "/api/messages/search-drivers?search={{DRIVER_SEARCH_KEYWORD}}",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathTypes": {
+        "data": "array"
+      }
+    }
+  },
+  {
+    "name": "Messages: admin conversations",
+    "input": {
+      "method": "GET",
+      "path": "/api/messages/conversations",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathTypes": {
+        "data": "array"
+      }
+    }
+  },
+  {
+    "name": "Messages: driver conversations",
+    "input": {
+      "method": "GET",
+      "path": "/api/messages/driver-conversations",
+      "auth": "driver"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathTypes": {
+        "data": "array"
+      }
+    }
+  },
+  {
+    "name": "Messages: admin fetch one conversation",
+    "input": {
+      "method": "GET",
+      "path": "/api/messages/admin?user_role=admin&user_id={{ADMIN_ID}}&other_role=driver&other_id={{DRIVER_ID}}",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathTypes": {
+        "data": "array"
+      }
+    }
+  },
+  {
+    "name": "Messages: driver fetch one conversation",
+    "input": {
+      "method": "GET",
+      "path": "/api/messages/driver?user_role=driver&user_id={{DRIVER_ID}}&other_role=admin&other_id={{ADMIN_ID}}",
+      "auth": "driver"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonPathTypes": {
+        "data": "array"
+      }
+    }
+  },
+  {
+    "name": "Messages: driver logout",
+    "input": {
+      "method": "POST",
+      "path": "/api/drivers/logout",
+      "auth": "driver"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "message": "Driver logged out successfully. Please delete the token on the client."
+      }
+    }
+  },
+  {
+    "name": "Messages: admin logout",
+    "input": {
+      "method": "POST",
+      "path": "/api/auth/logout",
+      "auth": "admin"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "jsonIncludes": {
+        "message": "Logged out successfully"
+      }
+    }
+  }
+]

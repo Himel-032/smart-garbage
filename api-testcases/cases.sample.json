@@ -1,0 +1,76 @@
+[
+  {
+    "name": "Health check should return backend running text",
+    "input": {
+      "method": "GET",
+      "path": "/"
+    },
+    "expectedOutput": {
+      "status": 200,
+      "bodyIncludes": "Smart Garbage Management System Backend is running"
+    }
+  },
+  {
+    "name": "Protected bins endpoint without token should be unauthorized",
+    "input": {
+      "method": "GET",
+      "path": "/api/bins"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: No token provided"
+      }
+    }
+  },
+  {
+    "name": "Driver home without bearer token should fail",
+    "input": {
+      "method": "GET",
+      "path": "/api/drivers/home"
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Authorization header missing or malformed"
+      }
+    }
+  },
+  {
+    "name": "Bins data endpoint should reject wrong device auth header",
+    "input": {
+      "method": "POST",
+      "path": "/api/bins/data",
+      "headers": {
+        "authorization": "WRONG_TOKEN"
+      },
+      "body": {
+        "device_name": "Bin-101",
+        "weight_gm": 120,
+        "distance_cm": 11
+      }
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized"
+      }
+    }
+  },
+  {
+    "name": "Protected endpoint with invalid JWT should fail token verification",
+    "input": {
+      "method": "GET",
+      "path": "/api/messages/conversations",
+      "headers": {
+        "authorization": "Bearer not-a-valid-jwt"
+      }
+    },
+    "expectedOutput": {
+      "status": 401,
+      "jsonIncludes": {
+        "message": "Unauthorized: Token verification failed"
+      }
+    }
+  }
+]

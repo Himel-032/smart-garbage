@@ -369,7 +369,6 @@ export const markBinCollected = async (req, res) => {
     const result = await pool.query(
       `UPDATE bins
        SET current_level = 0,
-           status = 'empty',
            last_collected_photo = COALESCE($1, last_collected_photo),
            updated_at = NOW()
        WHERE id = $2

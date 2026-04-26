@@ -186,81 +186,138 @@ export const updateBin = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-const calculateFillLevel = (weight_gm, distance_cm) => {
-  const MAX_WEIGHT = 1000;
-  const MAX_DISTANCE = 14;
 
-  const weight = Math.max(0, Math.min(Number(weight_gm), MAX_WEIGHT));
-  let distance = Math.max(0, Math.min(Number(distance_cm), MAX_DISTANCE));
-  if (distance_cm >= MAX_DISTANCE) {
-    distance = 0.5;
-  }
 
-  // 1. Normalize inputs (0–100)
-  const weightFill = (weight / MAX_WEIGHT) * 100;
+// const calculateFillLevel = (weight_gm, distance_cm) => {
+//   const MAX_WEIGHT = 1000;
+//   const MAX_DISTANCE = 14;
 
-  // smaller distance = more full
-  const distanceFill = ((MAX_DISTANCE - distance) / MAX_DISTANCE) * 100;
+//   const weight = Math.max(0, Math.min(Number(weight_gm), MAX_WEIGHT));
+//   let distance = Math.max(0, Math.min(Number(distance_cm), MAX_DISTANCE));
+//   if (distance_cm >= MAX_DISTANCE) {
+//     distance = 0.5;
+//   }
 
-  // 2. Adaptive weighting
+//   // 1. Normalize inputs (0–100)
+//   const weightFill = (weight / MAX_WEIGHT) * 100;
 
-  const distanceRatio = distance / MAX_DISTANCE; // 0 (full) → 1 (empty)
+//   // smaller distance = more full
+//   const distanceFill = ((MAX_DISTANCE - distance) / MAX_DISTANCE) * 100;
 
-  const weightFactor = 0.35; // fixed support status
-  const distanceFactor = 1 - weightFactor;
+//   // 2. Adaptive weighting
 
-  // 3. Final fill level
+//   const distanceRatio = distance / MAX_DISTANCE; // 0 (full) → 1 (empty)
 
-  const fillLevel = Math.round(
-    weightFactor * weightFill + distanceFactor * distanceFill,
-  );
+//   const weightFactor = 0.35; // fixed support status
+//   const distanceFactor = 1 - weightFactor;
 
-  let fillStatus = "Empty";
+//   // 3. Final fill level
 
-  if (fillLevel >= 85) fillStatus = "Full";
-  else if (fillLevel >= 60) fillStatus = "High";
-  else if (fillLevel >= 35) fillStatus = "Medium";
-  else if (fillLevel >= 10) fillStatus = "Low";
+//   const fillLevel = Math.round(
+//     weightFactor * weightFill + distanceFactor * distanceFill,
+//   );
 
-  return {
-    fillLevel,
-    fillStatus,
-    weightFill: Math.round(weightFill),
-    distanceFill: Math.round(distanceFill),
-  };
+//   let fillStatus = "Empty";
+
+//   if (fillLevel >= 85) fillStatus = "Full";
+//   else if (fillLevel >= 60) fillStatus = "High";
+//   else if (fillLevel >= 35) fillStatus = "Medium";
+//   else if (fillLevel >= 10) fillStatus = "Low";
+
+//   return {
+//     fillLevel,
+//     fillStatus,
+//     weightFill: Math.round(weightFill),
+//     distanceFill: Math.round(distanceFill),
+//   };
+// };
+
+
+// export const receiveBinData = async (req, res) => {
+//   const auth = req.headers.authorization;
+
+//   if (auth !== process.env.BIN_AUTH_TOKEN) {
+//     return res.status(401).json({ message: "Unauthorized" });
+//   }
+
+//   const { device_name, weight_gm, distance_cm } = req.body;
+
+//   const { fillLevel, fillStatus, weightFill, distanceFill } =
+//     calculateFillLevel(weight_gm, distance_cm);
+//   const result = await pool.query(
+//     `SELECT current_level FROM bins WHERE name = $1`,
+//     [device_name],
+//   );
+//   if (result.rows.length === 0) {
+//     return res.status(404).json({ message: "Bin not found" });
+//   }
+//   if (
+//     Math.abs(result.rows[0].current_level - fillLevel) > 5 &&
+//     weightFill > 5
+//   ) {
+//     console.log(device_name, weight_gm, distance_cm);
+//     await pool.query(
+//       `UPDATE bins SET current_level = $1, updated_at = NOW() WHERE name = $2`,
+//       [fillLevel, device_name],
+//     );
+//     res.json({ status: "send to database" });
+//   } else {
+//     res.json({ status: "no significant change" });
+//   }
+// };
+
+
+
+const MAX_DISTANCE = 14; // cm — distance when bin is completely empty. 
+
+const calculateVolumeFromDistance = (distance_cm, capacity_liters) => {
+  const distance = Math.max(0.5, Math.min(Number(distance_cm), MAX_DISTANCE));
+  const capacity = Number(capacity_liters) || 100;
+  const fillRatio = (MAX_DISTANCE - distance) / MAX_DISTANCE; // 0.0 (empty) → 1.0 (full)
+  return Math.round(fillRatio * capacity);                     // litres, same unit as capacity
 };
+
 export const receiveBinData = async (req, res) => {
   const auth = req.headers.authorization;
-
   if (auth !== process.env.BIN_AUTH_TOKEN) {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   const { device_name, weight_gm, distance_cm } = req.body;
 
-  const { fillLevel, fillStatus, weightFill, distanceFill } =
-    calculateFillLevel(weight_gm, distance_cm);
+  // Fetch current_level AND capacity 
   const result = await pool.query(
-    `SELECT current_level FROM bins WHERE name = $1`,
-    [device_name],
+    `SELECT current_level, capacity FROM bins WHERE name = $1`,
+    [device_name]
   );
   if (result.rows.length === 0) {
     return res.status(404).json({ message: "Bin not found" });
   }
-  if (
-    Math.abs(result.rows[0].current_level - fillLevel) > 5 &&
-    weightFill > 5
-  ) {
-    console.log(device_name, weight_gm, distance_cm);
+
+  const { current_level, capacity } = result.rows[0];
+  const volumeLiters = calculateVolumeFromDistance(distance_cm, capacity);
+
+  // Weight cross-check: if volume looks significant but weight is near zero, skip
+  const sensorConflict = volumeLiters > capacity * 0.3 && Number(weight_gm) < 20;
+  if (sensorConflict) {
+    console.warn(`Sensor conflict on ${device_name}: distance implies ${volumeLiters}L but weight=${weight_gm}g`);
+    return res.json({ status: "skipped — sensor conflict", volumeLiters });
+  }
+
+  // Only write if changed by more than 3% of capacity (avoids noise)
+  const changeThreshold = Math.round(capacity * 0.03);
+  if (Math.abs(current_level - volumeLiters) > changeThreshold) {
     await pool.query(
       `UPDATE bins SET current_level = $1, updated_at = NOW() WHERE name = $2`,
-      [fillLevel, device_name],
+      [volumeLiters, device_name]
     );
-    res.json({ status: "send to database" });
-  } else {
-    res.json({ status: "no significant change" });
+    console.log(`Updated ${device_name}: volume=${volumeLiters}L (capacity ${capacity}L)`);
+    return res.json({ status: "updated", volumeLiters, capacity });
   }
+
+  res.json({ status: "no significant change", volumeLiters });
 };
+
 
 export const getAssignedBins = async (req, res) => {
   try {
@@ -312,7 +369,6 @@ export const markBinCollected = async (req, res) => {
     const result = await pool.query(
       `UPDATE bins
        SET current_level = 0,
-           status = 'empty',
            last_collected_photo = COALESCE($1, last_collected_photo),
            updated_at = NOW()
        WHERE id = $2

@@ -11,6 +11,8 @@ const BinsPage = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filteredCount, setFilteredCount] = useState(0);
   const [showAll, setShowAll] = useState(false);
 
   const navigate = useNavigate();
@@ -32,6 +34,27 @@ const BinsPage = () => {
     fetchBins();
   }, []);
 
+  const getFillStatus = (bin) => {
+    const capacity = Number(bin.capacity) || 0;
+    const currentLevel = Number(bin.current_level) || 0;
+
+    if (capacity <= 0) {
+      return "available";
+    }
+
+    const fillPercentage = (currentLevel / capacity) * 100;
+
+    if (fillPercentage >= 80) {
+      return "critical";
+    }
+
+    if (fillPercentage >= 50) {
+      return "half-filled";
+    }
+
+    return "available";
+  };
+
   // Handle search and filter
   useEffect(() => {
     let filtered = bins;
@@ -44,16 +67,23 @@ const BinsPage = () => {
 
     if (filterLocation) {
       filtered = filtered.filter(
-        (bin) => bin.location.toLowerCase() === filterLocation.toLowerCase(),
+        (bin) =>
+          (bin.location || "").toLowerCase() === filterLocation.toLowerCase(),
       );
     }
+
+    if (filterStatus) {
+      filtered = filtered.filter((bin) => getFillStatus(bin) === filterStatus);
+    }
+
+    setFilteredCount(filtered.length);
 
     if (showAll) {
       setDisplayedBins(filtered);
     } else {
       setDisplayedBins(filtered.slice(0, 4));
     }
-  }, [search, filterLocation, showAll, bins]);
+  }, [search, filterLocation, filterStatus, showAll, bins]);
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this bin?")) {
@@ -83,7 +113,7 @@ const BinsPage = () => {
   }
 
   // Extract unique areas for filter dropdown
-  const areas = [...new Set(bins.map((bin) => bin.location))];
+  const areas = [...new Set(bins.map((bin) => bin.location).filter(Boolean))];
 
   return (
     <DashboardLayout>
@@ -115,6 +145,16 @@ const BinsPage = () => {
               </option>
             ))}
           </select>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="p-2 border rounded-md w-full sm:w-1/3"
+          >
+            <option value="">All Fill Status</option>
+            <option value="available">Empty/Available</option>
+            <option value="half-filled">Half Filled</option>
+            <option value="critical">Critical</option>
+          </select>
         </div>
 
         {/* Bin Grid */}
@@ -131,7 +171,7 @@ const BinsPage = () => {
         )}
 
         {/* See All Button */}
-        {!showAll && displayedBins.length < bins.length && (
+        {!showAll && displayedBins.length < filteredCount && (
           <div className="flex justify-center mt-6 rounded-md">
             <Button onClick={() => setShowAll(true)}>See All</Button>
           </div>

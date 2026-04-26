@@ -132,11 +132,15 @@ function DriverDetailPage() {
             <ArrowLeft size={20} />
             <span className="font-medium">Back to Drivers</span>
           </button>
-          
+
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Driver Profile</h1>
-              <p className="text-gray-600 mt-1">View and manage driver information</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Driver Profile
+              </h1>
+              <p className="text-gray-600 mt-1">
+                View and manage driver information
+              </p>
             </div>
           </div>
         </div>
@@ -161,16 +165,18 @@ function DriverDetailPage() {
                     </div>
                   )}
                 </div>
-                
-                <h2 className="text-xl font-bold text-white mb-2">{driver.name}</h2>
-                
+
+                <h2 className="text-xl font-bold text-white mb-2">
+                  {driver.name}
+                </h2>
+
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium bg-white/20 text-white">
                   {statusConfig.icon}
                   <span>{driver.status.toUpperCase()}</span>
                 </div>
-                
+
                 <div className="mt-4 text-emerald-100 text-sm">
-                  ID: #{String(driver.id).padStart(4, '0')}
+                  ID: #{String(driver.id).padStart(4, "0")}
                 </div>
               </div>
 
@@ -178,14 +184,23 @@ function DriverDetailPage() {
               <div className="p-6 border-b border-gray-100">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">{validBins.length}</div>
-                    <div className="text-xs text-gray-500 mt-1">Assigned Bins</div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {validBins.length}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Assigned Bins
+                    </div>
                   </div>
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">
-                      {Math.floor((new Date() - new Date(driver.created_at)) / (1000 * 60 * 60 * 24))}
+                      {Math.floor(
+                        (new Date() - new Date(driver.created_at)) /
+                          (1000 * 60 * 60 * 24),
+                      )}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">Days Active</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Days Active
+                    </div>
                   </div>
                 </div>
               </div>
@@ -207,6 +222,13 @@ function DriverDetailPage() {
                   Assign Bins
                 </button>
                 <button
+                  onClick={() => navigate(`/drivers/${id}/performance`)}
+                  className="w-full flex items-center justify-center gap-2 bg-violet-600 text-white py-2.5 rounded-lg hover:bg-violet-700 transition font-medium"
+                >
+                  <BarChart3 size={18} />
+                  View Performance
+                </button>
+                <button
                   onClick={handleDelete}
                   className="w-full flex items-center justify-center gap-2 bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 transition font-medium"
                 >
@@ -222,7 +244,9 @@ function DriverDetailPage() {
             {/* Contact Information */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
               <div className="px-6 py-4 border-b border-green-500">
-                <h3 className="text-lg font-semibold text-gray-900">Contact Information</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Contact Information
+                </h3>
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -231,8 +255,12 @@ function DriverDetailPage() {
                       <Mail className="text-emerald-600" size={20} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-medium text-gray-500 uppercase mb-1">Email</p>
-                      <p className="text-sm font-medium text-gray-900 break-all">{driver.email}</p>
+                      <p className="text-xs font-medium text-gray-500 uppercase mb-1">
+                        Email
+                      </p>
+                      <p className="text-sm font-medium text-gray-900 break-all">
+                        {driver.email}
+                      </p>
                     </div>
                   </div>
 
@@ -242,8 +270,12 @@ function DriverDetailPage() {
                         <Phone className="text-blue-600" size={20} />
                       </div>
                       <div className="flex-1">
-                        <p className="text-xs font-medium text-gray-500 uppercase mb-1">Phone</p>
-                        <p className="text-sm font-medium text-gray-900">{driver.phone}</p>
+                        <p className="text-xs font-medium text-gray-500 uppercase mb-1">
+                          Phone
+                        </p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {driver.phone}
+                        </p>
                       </div>
                     </div>
                   )}
@@ -254,7 +286,9 @@ function DriverDetailPage() {
             {/* Timeline */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
               <div className="px-6 py-4 border-b border-green-500">
-                <h3 className="text-lg font-semibold text-gray-900">Service Timeline</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Service Timeline
+                </h3>
               </div>
               <div className="p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -263,13 +297,18 @@ function DriverDetailPage() {
                       <Calendar className="text-green-600" size={20} />
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs font-medium text-gray-500 uppercase mb-1">Joined Date</p>
+                      <p className="text-xs font-medium text-gray-500 uppercase mb-1">
+                        Joined Date
+                      </p>
                       <p className="text-sm font-medium text-gray-900">
-                        {new Date(driver.created_at).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
+                        {new Date(driver.created_at).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          },
+                        )}
                       </p>
                     </div>
                   </div>
@@ -279,13 +318,18 @@ function DriverDetailPage() {
                       <Clock className="text-purple-600" size={20} />
                     </div>
                     <div className="flex-1">
-                      <p className="text-xs font-medium text-gray-500 uppercase mb-1">Last Updated</p>
+                      <p className="text-xs font-medium text-gray-500 uppercase mb-1">
+                        Last Updated
+                      </p>
                       <p className="text-sm font-medium text-gray-900">
-                        {new Date(driver.updated_at).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
+                        {new Date(driver.updated_at).toLocaleDateString(
+                          "en-US",
+                          {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          },
+                        )}
                       </p>
                     </div>
                   </div>
@@ -297,8 +341,12 @@ function DriverDetailPage() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200">
               <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Assigned Bins</h3>
-                  <p className="text-sm text-gray-500 mt-0.5">{validBins.length} bin(s) assigned</p>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Assigned Bins
+                  </h3>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    {validBins.length} bin(s) assigned
+                  </p>
                 </div>
                 <button
                   onClick={() => setIsAssignModalOpen(true)}
@@ -313,7 +361,9 @@ function DriverDetailPage() {
                 {validBins.length === 0 ? (
                   <div className="text-center py-12">
                     <Package className="mx-auto text-gray-300 mb-3" size={48} />
-                    <h4 className="text-lg font-semibold text-gray-900 mb-1">No bins assigned</h4>
+                    <h4 className="text-lg font-semibold text-gray-900 mb-1">
+                      No bins assigned
+                    </h4>
                     <p className="text-gray-500 text-sm mb-4">
                       This driver doesn't have any bins assigned yet
                     </p>
@@ -339,8 +389,12 @@ function DriverDetailPage() {
                               <Package className="text-emerald-600" size={16} />
                             </div>
                             <div>
-                              <h4 className="font-semibold text-gray-900 text-sm">{bin.name}</h4>
-                              <p className="text-xs text-gray-500">ID: {String(bin.id).padStart(4, '0')}</p>
+                              <h4 className="font-semibold text-gray-900 text-sm">
+                                {bin.name}
+                              </h4>
+                              <p className="text-xs text-gray-500">
+                                ID: {String(bin.id).padStart(4, "0")}
+                              </p>
                             </div>
                           </div>
                           <span
@@ -348,27 +402,34 @@ function DriverDetailPage() {
                               bin.status === "full"
                                 ? "bg-red-100 text-red-700"
                                 : bin.status === "empty"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-yellow-100 text-yellow-700"
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-yellow-100 text-yellow-700"
                             }`}
                           >
-                            {bin.status?.toUpperCase() || 'OK'}
+                            {bin.status?.toUpperCase() || "OK"}
                           </span>
                         </div>
-                        
+
                         <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
                           <MapPin size={14} className="text-gray-400" />
                           <span className="truncate">{bin.location}</span>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-2 text-xs">
                           <div className="bg-gray-50 rounded px-2 py-1.5">
                             <span className="text-gray-500">Capacity: </span>
-                            <span className="font-semibold text-gray-900">{bin.capacity}L</span>
+                            <span className="font-semibold text-gray-900">
+                              {bin.capacity}L
+                            </span>
                           </div>
                           <div className="bg-gray-50 rounded px-2 py-1.5">
                             <span className="text-gray-500">Level: </span>
-                            <span className="font-semibold text-gray-900">{bin.current_level || 0}%</span>
+                            <span className="font-semibold text-gray-900">
+                              {Math.round(
+                                (bin.current_level / bin.capacity) * 100,
+                              )}
+                              % ({bin.current_level || 0} L) 
+                            </span>
                           </div>
                         </div>
                       </div>

@@ -83,6 +83,121 @@ export const getDriverById = async (req, res) => {
   }
 };
 
+export const getDriverPerformance = async (req, res) => {
+  const { id } = req.params;
+  const driverId = parseInt(id);
+
+  if (isNaN(driverId)) {
+    return res.status(400).json({ message: "Invalid driver ID" });
+  }
+
+  try {
+    const driverResult = await pool.query(
+      `SELECT id, name, email, phone, photo_url, status
+       FROM drivers
+       WHERE id = $1`,
+      [driverId],
+    );
+
+    if (driverResult.rows.length === 0) {
+      return res.status(404).json({ message: "Driver not found" });
+    }
+
+    const binsResult = await pool.query(
+      `SELECT
+         id,
+         name,
+         location,
+         capacity,
+         current_level,
+         ROUND(
+           CASE
+             WHEN COALESCE(capacity, 0) = 0 THEN 0
+             ELSE (COALESCE(current_level, 0)::numeric / NULLIF(capacity, 0)) * 100
+           END,
+           2
+         ) AS fill_percentage
+       FROM bins
+       WHERE driver_id = $1
+       ORDER BY id ASC`,
+      [driverId],
+    );
+
+    const assignedBins = binsResult.rows.map((bin) => ({
+      ...bin,
+      fill_percentage: Number(bin.fill_percentage) || 0,
+    }));
+
+    const performanceResult = await pool.query(
+      `WITH low_readings AS (
+         SELECT br.id, br.bin_id, br.recorded_at AS low_at
+         FROM bin_readings br
+         JOIN bins b ON b.id = br.bin_id
+         WHERE b.driver_id = $1
+           AND br.recorded_at >= date_trunc('month', NOW())
+           AND br.recorded_at < date_trunc('month', NOW()) + interval '1 month'
+           AND br.fill_level < 20
+       ),
+       detected_events AS (
+         SELECT
+           lr.bin_id,
+           lr.low_at,
+           ph.high_at,
+           EXTRACT(EPOCH FROM (lr.low_at - ph.high_at)) / 3600.0 AS response_hours
+         FROM low_readings lr
+         JOIN LATERAL (
+           SELECT br2.recorded_at AS high_at
+           FROM bin_readings br2
+           WHERE br2.bin_id = lr.bin_id
+             AND br2.fill_level >= 80
+             AND br2.recorded_at <= lr.low_at
+             AND br2.recorded_at >= lr.low_at - interval '2 hours'
+           ORDER BY br2.recorded_at DESC
+           LIMIT 1
+         ) ph ON TRUE
+       )
+       SELECT
+         COUNT(*)::int AS collections_this_month,
+         ROUND(AVG(response_hours)::numeric, 2) AS avg_response_time_hours
+       FROM detected_events`,
+      [driverId],
+    );
+
+    const collectionsThisMonth =
+      performanceResult.rows[0]?.collections_this_month || 0;
+    const avgResponseTimeHoursRaw =
+      performanceResult.rows[0]?.avg_response_time_hours;
+
+    const binStatusSummary = assignedBins.reduce(
+      (summary, bin) => {
+        const fill = Number(bin.fill_percentage) || 0;
+
+        summary.total += 1;
+        if (fill >= 80) summary.full += 1;
+        else if (fill >= 60) summary.high += 1;
+        else if (fill >= 35) summary.medium += 1;
+        else if (fill >= 10) summary.low += 1;
+        else summary.empty += 1;
+
+        return summary;
+      },
+      { total: 0, full: 0, high: 0, medium: 0, low: 0, empty: 0 },
+    );
+
+    res.json({
+      driver: driverResult.rows[0],
+      assignedBins,
+      collectionsThisMonth,
+      avgResponseTimeHours:
+        avgResponseTimeHoursRaw === null ? null : Number(avgResponseTimeHoursRaw),
+      binStatusSummary,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 export const updateDriver = async (req, res) => {
   try {
     const { id } = req.params;
@@ -270,7 +385,7 @@ export const driverForgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
-    // 1️⃣ Check if driver exists
+    // 1️ Check if driver exists
     const driverResult = await pool.query(
       "SELECT id, email FROM drivers WHERE email=$1 AND status='active'",
       [email],
@@ -290,17 +405,17 @@ export const driverForgotPassword = async (req, res) => {
             .update(resetToken)
             .digest("hex");
 
-    // 3️⃣ Store token and expiry in DB
+    // 3️ Store token and expiry in DB
     await pool.query(
       "UPDATE drivers SET reset_token=$1, reset_token_expires=NOW() + interval '15 minutes' WHERE email=$2",
       [hashedToken, email],
     );
 
-    // 4️⃣ Create reset link (can open web page or deep link in app)
+    // 4️ Create reset link (can open web page or deep link in app)
     // const resetLink = `https://yourapp.up.railway.app/reset-password?token=${resetToken}`;
     const resetLink = `${process.env.FRONTEND_URL}/driver/reset-password/${resetToken}`;
 
-    // 5️⃣ Send email using SendGrid
+    // 5️ Send email using SendGrid
     await sendEmail({
       to: driver.email,
       subject: "Reset Your Password",

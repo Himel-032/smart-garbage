@@ -1,10 +1,25 @@
-import React from "react";
-import { Trash2, MapPin, User, Droplets, Gauge,Edit2 } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Trash2,
+  MapPin,
+  User,
+  Droplets,
+  Gauge,
+  Edit2,
+  Camera,
+  ImageOff,
+  X,
+} from "lucide-react";
 
 const BinCard = ({ bin, onDelete, onEdit }) => {
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [imageLoadFailed, setImageLoadFailed] = useState(false);
+
   // Calculate fill percentage
   // const fillPercentage = Math.round((bin.current_level / bin.capacity) * 100);
-  const fillPercentage = bin.current_level;
+  // const fillPercentage = bin.current_level;
+  const fillPercentage = Math.round((bin.current_level / bin.capacity) * 100);
+  const hasPhoto = Boolean(bin.last_collected_photo) && !imageLoadFailed;
 
   // Determine status based on fill level
   const getStatus = () => {
@@ -121,7 +136,39 @@ const BinCard = ({ bin, onDelete, onEdit }) => {
             <span>Capacity: {bin.capacity}L</span>
           </div>
         </div>
+
+        <div className="pt-2">
+          <p className="text-xs font-semibold tracking-wide text-gray-500 uppercase mb-2">
+            Last Collection Photo
+          </p>
+
+          {hasPhoto ? (
+            <button
+              type="button"
+              onClick={() => setIsPreviewOpen(true)}
+              className="group relative w-full h-36 rounded-lg overflow-hidden border border-gray-200 bg-gray-100"
+              title="Click to view full image"
+            >
+              <img
+                src={bin.last_collected_photo}
+                alt={`${bin.name} after collection`}
+                className="w-full h-full object-cover"
+                onError={() => setImageLoadFailed(true)}
+              />
+              <div className="absolute inset-x-0 bottom-0 bg-black/55 text-white text-xs px-2 py-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                Tap to enlarge
+              </div>
+            </button>
+          ) : (
+            <div className="w-full h-36 rounded-lg border border-dashed border-gray-300 bg-gray-50 flex flex-col items-center justify-center gap-1.5 text-gray-500">
+              <ImageOff size={20} />
+              <span className="text-sm font-medium">No photo uploaded yet</span>
+              <span className="text-xs">This bin can remain empty after collection.</span>
+            </div>
+          )}
+        </div>
       </div>
+
       {/* Edit & Delete Buttons */}
       <div className="px-4 pb-4 flex gap-3">
         <button
@@ -137,6 +184,39 @@ const BinCard = ({ bin, onDelete, onEdit }) => {
           <Trash2 size={16} /> Delete
         </button>
       </div>
+
+      {isPreviewOpen && hasPhoto && (
+        <div
+          className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"
+          onClick={() => setIsPreviewOpen(false)}
+        >
+          <div
+            className="relative bg-white rounded-xl shadow-2xl max-w-3xl w-full overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+              <div className="flex items-center gap-2 text-gray-800 font-semibold">
+                <Camera size={18} />
+                <span>{bin.name} - Collection Photo</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPreviewOpen(false)}
+                className="p-1.5 rounded-md hover:bg-gray-100 text-gray-600"
+                aria-label="Close preview"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <img
+              src={bin.last_collected_photo}
+              alt={`${bin.name} full collection preview`}
+              className="w-full max-h-[75vh] object-contain bg-black"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

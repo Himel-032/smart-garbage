@@ -11,7 +11,8 @@ import {
   logoutDriver,
   driverForgotPassword,
   driverResetPassword,
-  validateDriverResetToken
+  validateDriverResetToken,
+  getDriverPerformance,
 } from "../controllers/drivers.controller.js";
 import { protectRoute } from "../middleware/protectRoute.js";
 import { authenticateDriver } from "../middleware/driverAuth.js";
@@ -27,6 +28,7 @@ router.get("/validate-reset-token/:token", validateDriverResetToken);
 
 router.get("/", protectRoute, getAllDrivers);
 router.post("/", upload.single("photo"), protectRoute, createDriver);
+router.get("/:id/performance", protectRoute, getDriverPerformance);
 router.get("/:id", protectRoute, getDriverById);
 router.put("/:id", upload.single("photo"), protectRoute, updateDriver);
 router.put("/assign/bins", protectRoute, assignBins);
